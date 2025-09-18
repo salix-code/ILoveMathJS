@@ -41,7 +41,7 @@ class Question_1 extends Question{
     }
 
     private init_random_number(): void{
-        this.random_number = Math.random() * 10000;
+        this.random_number = Math.floor(Math.random() * 9999) + 1;
 
     }
     private init_ui(): void{
@@ -156,6 +156,82 @@ class Question_1 extends Question{
                 label.y = 120;
             }
         }
+    }
+}
+
+/**
+ * 0 1
+ * 2 3
+ * 4 5
+ * 6 7
+ * 9 8
+ */
+
+
+class Question_2 extends Question{
+    private labels:Text[] = [];
+    private number_count : number = 0;
+    private number_list : number[] = [];
+
+    constructor(title:string) {
+        super(title)
+        this.number_count = 2;
+        this.init_number();
+        const label_count = (this.number_count + 1) * 4;
+        for(let i = 0; i < label_count; i++){
+            let label = new Text();
+            label.style = { fill: 'white', fontSize: 24 };
+            this.labels.push(label);    
+        }
+        this.init_ui();
+    }
+    private init_number() : void{
+        let total = Math.floor(Math.random() * 9) + 1;
+        this.number_list.push(total); // 1-9
+        for(let i = 1; i < this.number_count; i++){
+            this.number_list.push(Math.floor(Math.random() * 10)) // 0 - 9
+            total = total * 10 + this.number_list[i]!;
+        }
+        this.number_list.push(1);
+        this.number_list.push(1);
+        for(let i = 0; i < this.number_count; i++){
+            this.number_list.push(this.number_list[i]!);
+        }
+        for(let i = 0; i < this.number_count; i++){
+            this.number_list.push(this.number_list[i]!);
+        }
+        while(total != 0){
+            this.number_list.push(total % 10);
+            total = Math.floor(total / 10);
+        }
+    }
+    private init_ui(): void{
+        for(let i = 0; i < this.number_count; ++i){
+            let label = this.labels[i];
+            label.text = this.number_list[i]!.toString();
+            label.x = 100 + i * 30;
+            label.y = 20;
+            this.addChild(label);
+        }
+        for(let i = 0; i < 2; ++i){
+            let label = this.labels[this.number_count + i];
+            label.text = this.number_list[i]!.toString();
+            label.x = 100 + i * 30;
+            label.y = 20;
+            this.addChild(label);
+        }
+        
+    }
+    private clean_ui(): void{
+        for(const label of this.labels){
+            this.removeChild(label);
+        }
+    }
+    public regenerate(): void {
+        
+    }
+    protected draw(step_direction: number): void {
+        
     }
 }
 
