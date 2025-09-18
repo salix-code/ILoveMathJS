@@ -1,6 +1,6 @@
 import { Application, Graphics,Text } from 'pixi.js';
 
-import { Math_3_2 } from './ui/ui_3_2';
+import { Math_3_3 } from './ui/ui_3_3';
 
 
 const app = new Application();
@@ -15,7 +15,7 @@ title.x = 200
 title.y = 0
 
 
-const shape_3_2 = new Math_3_2();
+const shape_3_2 = new Math_3_3(0,0);
 
 shape_3_2.x = 0;
 shape_3_2.y = 200;  

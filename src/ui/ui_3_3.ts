@@ -10,11 +10,12 @@ class Question extends Container{
     
     constructor(title:string){
         super()
-        const title_label = new Text().style({ fill: 'white', fontSize: 24 });
+        const title_label = new Text()
+        title_label.style = { fill: 'white', fontSize: 24 };
         title_label.text = title
         title_label.x = 100;
         title_label.y = 20;
-        this.addChild(tltle)
+        this.addChild(title_label)
 
     }
     public step(d: number): void {
@@ -95,10 +96,12 @@ class Question_1 extends Question{
 
     private get_or_create_if_not_exists(index:number): Text{
         if(this.labels.length > index){
-            return this.labels[index];
+            return this.labels[index]!;
         }
-        let label = new Text().style({ fill: 'white', fontSize: 24 });
+        let label = new Text();
+        label.style = { fill: 'white', fontSize: 24 };
         this.labels.push(label);
+        return label
     }
 
     protected draw(step_direction:number): void{
@@ -160,7 +163,7 @@ class Question_1 extends Question{
 
 export class Math_3_3 extends Container {
     private question!:Question;
-    
+    private question_index: number = 1;
     constructor(x : number,y:number) {
         super();
         
@@ -192,16 +195,16 @@ export class Math_3_3 extends Container {
 
     private onKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'ArrowRight') {
-            this.draw_answer(1);
+            this.step_answer(1);
         } else if (e.key === 'ArrowLeft') {
-            this.draw_answer(-1);
+            this.step_answer(-1);
         } else if (e.key === 'ArrowUp') {
             this.question_index -= 1;
-            this.next_question()
+            this.step_question(1)
 
         } else if (e.key === 'ArrowDown') {
             this.question_index += 1;
-            this.next_question()
+            this.step_question(-1);
         }
         else if (e.key === '`'){
             this.regenerated();

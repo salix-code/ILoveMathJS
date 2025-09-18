@@ -9,7 +9,7 @@ interface Question {
 class Question_1 extends Container implements Question{
     private step_num : number;
     private draw_step  : number;
-    private label :Text;
+    private label_text :Text;
     private sequare : Graphics;
     private arrow:Graphics;
 
@@ -17,9 +17,9 @@ class Question_1 extends Container implements Question{
         super();
         this.step_num = 0;
         this.draw_step = 0;
-        this.label = new Text();
-        this.label.text = "A"
-        this.label.style = { fill: 'white', fontSize: 24 };
+        this.label_text = new Text();
+        this.label_text.text = "A"
+        this.label_text.style = { fill: 'white', fontSize: 24 };
         
         this.sequare = new Graphics()
             .rect(0, 0, 100, 100)
@@ -48,7 +48,7 @@ class Question_1 extends Container implements Question{
         this.draw_step = this.step_num
 
         if(this.draw_step == 1){
-            this.addChild(this.label)
+            this.addChild(this.label_text)
             this.addChild(this.sequare)
         }
         else if(this.draw_step == 2){
@@ -56,10 +56,10 @@ class Question_1 extends Container implements Question{
         }
         else if(this.draw_step == 3){
             this.removeChild(this.arrow)
-            this.label.x = 0;
+            this.label_text.x = 0;
         }
         else if(this.draw_step == 4){
-            this.label.x = 0;
+            this.label_text.x = 0;
             this.addChild(this.arrow);
         }
         else if(this.draw_step == 5){
@@ -80,7 +80,8 @@ class Question_2 extends Container implements Question{
         super()
 
         for(let i = 0; i < 4; ++i){
-            let label = new Text().style({ fill: 'white', fontSize: 24 });
+            let label = new Text();
+            label.style = { fill: 'white', fontSize: 24 };
             label.text = ('A' + i)
             
             let sequare = new Graphics()
@@ -106,8 +107,8 @@ class Question_2 extends Container implements Question{
         if (this.answer_index == 0){
             if(this.step_direction == 1){
                 for(let i = 0; i < 2; ++i){
-                    this.addChild(this.labels[i]);
-                    this.addChild(this.sequares[i]);
+                    this.addChild(this.labels[i]!);
+                    this.addChild(this.sequares[i]!);
                 }
             }
             else{
@@ -117,12 +118,12 @@ class Question_2 extends Container implements Question{
         else if(this.answer_index == 1){
             if(this.step_direction == 1){
                 for(let i = 0; i < 2; ++i){
-                    this.addChild(this.arrows[i])
+                    this.addChild(this.arrows[i]!)
                 }
                 for(let i = 0; i < 2; ++i){
-                    this.addChild(this.labels[i + 2]);
-                    this.addChild(this.sequares[i + 2]);
-                    this.addChild(this.arrows[i + 2])
+                    this.addChild(this.labels[i + 2]!);
+                    this.addChild(this.sequares[i + 2]!);
+                    this.addChild(this.arrows[i + 2]!)
                 }
             }
             else if(this.step_direction == -1){
@@ -135,12 +136,12 @@ class Question_2 extends Container implements Question{
             }
             else{
                 for(let i = 0; i < 2; ++i){
-                    this.removeChild(this.arrows[i])
+                    this.removeChild(this.arrows[i]!)
                 }
                 for(let i = 0; i < 2; ++i){
-                    this.removeChild(this.labels[i + 2]);
-                    this.removeChild(this.sequares[i + 2]);
-                    this.removeChild(this.arrows[i + 2])
+                    this.removeChild(this.labels[i + 2]!);
+                    this.removeChild(this.sequares[i + 2]!);
+                    this.removeChild(this.arrows[i + 2]!)
                 }
             }
         }
@@ -155,10 +156,11 @@ class Question_3 extends Container implements Question{
 
     constructor(){
         super()
-        let title = new Text().style({ fill: 'white', fontSize: 24 });
+        let title = new Text();
+        title.style ={ fill: 'white', fontSize: 24 };
         title.text = "把ABC三个字母放在四个方框里"
 
-        this.addChild(tltle)
+        this.addChild(title)
 
     }
     step(d: number): void {
@@ -172,7 +174,7 @@ class Question_3 extends Container implements Question{
 
 export class Math_3_2 extends Container {
     private question_index: number;
-    private question!: Question;
+    private question!: Container & Question;
     private begin_x:number;
     private begin_y:number;
 
