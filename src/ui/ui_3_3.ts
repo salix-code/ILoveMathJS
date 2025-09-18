@@ -163,7 +163,7 @@ class Question_1 extends Question{
 
 export class Math_3_3 extends Container {
     private question!:Question;
-    private question_index: number = 1;
+    private question_index: number = 0;
     constructor(x : number,y:number) {
         super();
         
@@ -199,7 +199,6 @@ export class Math_3_3 extends Container {
         } else if (e.key === 'ArrowLeft') {
             this.step_answer(-1);
         } else if (e.key === 'ArrowUp') {
-            this.question_index -= 1;
             this.step_question(1)
 
         } else if (e.key === 'ArrowDown') {
