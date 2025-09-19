@@ -13,13 +13,12 @@ class Question extends Container{
         const title_label = new Text()
         title_label.style = { fill: 'white', fontSize: 24 };
         title_label.text = title
-        title_label.x = 100;
+        title_label.x = 300;
         title_label.y = 20;
         this.addChild(title_label)
 
     }
     public step(d: number): void {
-        
         this.draw(d);
         this.answer_index += d;
     }
