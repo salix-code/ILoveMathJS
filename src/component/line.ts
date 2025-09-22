@@ -16,8 +16,8 @@ export class Line extends PIXI.Graphics {
         this.lineStyle(1, 0xFF0000);
 
         // 绘制直线：从 (50, 50) 到 (200, 50)
-        graphthisics.moveTo(this.point_x[0], this.point_y[0]);
-        this.lineTo(this.point_x[1], this.point_y[1]);
+        this.moveTo(this.point_x[0]!, this.point_y[0]!);
+        this.lineTo(this.point_x[1]!, this.point_y[1]!);
 
         // 结束绘制
         this.stroke();

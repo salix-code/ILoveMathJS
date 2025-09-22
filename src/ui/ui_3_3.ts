@@ -1,4 +1,5 @@
 import { Container, Graphics, Text } from 'pixi.js';
+import { Line } from '../component/line';
 
 function format(str: string, ...args: any[]) {
     return str.replace(/{(\d+)}/g, (match, index) => args[index]);
@@ -20,7 +21,6 @@ class Question extends Container{
     }
     public step(d: number): void {
         this.draw(d);
-        this.answer_index += d;
     }
     protected draw(step_direction:number): void{
         
@@ -166,74 +166,203 @@ class Question_1 extends Question{
  * 9 8
  */
 
-
-class Question_2 extends Question{
+// m * n
+class Multiply extends Container{
     private labels:Text[] = [];
-    private number_count : number = 0;
-    private number_list : number[] = [];
+    private number_layer : number[] = [];
+    private label_layer_count : number[] = [];
+    private flag_label! : Text;
+    private line : Line[] = [];
 
-    constructor(title:string) {
-        super(title)
-        this.number_count = 2;
-        this.init_number();
-        const label_count = (this.number_count + 1) * 4;
-        for(let i = 0; i < label_count; i++){
-            let label = new Text();
-            label.style = { fill: 'white', fontSize: 24 };
-            this.labels.push(label);    
-        }
-        this.init_ui();
+    public is_finished : boolean = false;
+
+
+    constructor(m:number,n:number) {
+        super();
+        this.init_number(m,n);
+        this.start();
     }
-    private init_number() : void{
-        let total = Math.floor(Math.random() * 9) + 1;
-        this.number_list.push(total); // 1-9
-        for(let i = 1; i < this.number_count; i++){
-            this.number_list.push(Math.floor(Math.random() * 10)) // 0 - 9
-            total = total * 10 + this.number_list[i]!;
-        }
-        this.number_list.push(1);
-        this.number_list.push(1);
-        for(let i = 0; i < this.number_count; i++){
-            this.number_list.push(this.number_list[i]!);
-        }
-        for(let i = 0; i < this.number_count; i++){
-            this.number_list.push(this.number_list[i]!);
-        }
-        while(total != 0){
-            this.number_list.push(total % 10);
-            total = Math.floor(total / 10);
-        }
+    private create_number_text():Text{
+        let label = new Text();
+        label.style = { fill: 'white', fontSize: 24 };
+        this.labels.push(label);  
+        return label;  
     }
-    private init_ui(): void{
-        for(let i = 0; i < this.number_count; ++i){
-            let label = this.labels[i];
-            label.text = this.number_list[i]!.toString();
-            label.x = 100 + i * 30;
-            label.y = 20;
-            this.addChild(label);
-        }
-        for(let i = 0; i < 2; ++i){
-            let label = this.labels[this.number_count + i];
-            label.text = this.number_list[i]!.toString();
-            label.x = 100 + i * 30;
-            label.y = 20;
-            this.addChild(label);
+    
+    private init_number(m:number,n:number) : void{
+        this.number_layer = [];
+        this.number_layer.push(m,n);
+        let x = n;
+        while(x > 0){
+            this.number_layer.push((x % 10) * m);
+            x = Math.floor(x/10);
         }
         
+        this.number_layer.push(m * n);
+    }
+    
+    private start(): void{
+        this.create_layer(this.number_layer[0]!,0);
+        this.create_layer(this.number_layer[1]!,1);
+        this.flag_label = new Text();
+        this.flag_label.style = { fill: 'white', fontSize: 24 };
+        this.flag_label.text = "X";
+        this.flag_label.x = 320;
+        this.flag_label.y = 90;
+        this.addChild(this.flag_label);
+        this.line[0] = new Line(300, 120, 480, 120);
+        this.addChild(this.line[0]!);
+    }
+
+    private create_layer(num:number,layer_index : number): void{
+        let count = 0;
+        let x_offset = 0;
+        if (layer_index > 2 && layer_index != this.number_layer.length - 1){
+            x_offset = (layer_index - 2) * 25;
+        }
+        while(num > 0){
+            const x = num % 10;
+            const label = this.create_number_text();
+            label.text = x.toString();
+            label.x = 400 - count * 24 - x_offset;
+            label.y = 60 + 30 * layer_index;
+            this.addChild(label);
+            num = Math.floor(num / 10);
+            count += 1;
+        }
+        this.label_layer_count.push(count);
     }
     private clean_ui(): void{
         for(const label of this.labels){
             this.removeChild(label);
         }
+        this.labels = [];
+        for(const l of this.line){
+            this.removeChild(l);
+        }
+        this.line = [];
+        this.label_layer_count = [];
+        this.is_finished = false;
     }
-    public regenerate(): void {
-        
+    public regenerate(m:number,n:number): void {
+        this.clean_ui();
+        this.init_number(m,n)
+        this.start();
     }
-    protected draw(step_direction: number): void {
-        
+    public draw(step_direction: number): void {
+        if(step_direction == 1){
+            let layer_index = this.label_layer_count.length;
+            if(layer_index < this.number_layer.length){
+                if(layer_index == this.number_layer.length - 1){
+                    let height_offset = (this.number_layer.length - 3) * 30 + 120;
+                    this.line[1] = new Line(300, height_offset, 480, height_offset);
+                    this.addChild(this.line[1]);
+                    this.is_finished = true;
+                }
+                this.create_layer(this.number_layer[layer_index]!,layer_index);
+            }
+        }
+        else if(step_direction == -1){
+            let layer_index = this.label_layer_count.length - 1;
+            if (layer_index > 1){
+                if(layer_index < this.number_layer.length){
+                    if(layer_index == this.number_layer.length - 1){
+                        this.removeChild(this.line[1]!);
+                        this.line.pop();
+                    }
+                    this.is_finished = false;
+                    let count = this.label_layer_count.pop();
+                    while(count! > 0 && this.labels.length > 0){
+                        const label = this.labels.pop();
+                        this.removeChild(label!);
+                        count!--;
+                    }
+                }
+            }
+           
+        }
+    }
+
+    public get_result_layer_index():number{
+        return this.number_layer.length - 1;
     }
 }
 
+class Multiply_11 extends Question{
+    private view! : Multiply;
+
+    constructor(title:string){
+        super(title)
+        let [m,n] = this.generate_initialize_number();
+        this.view = new Multiply(m,n)
+        this.addChild(this.view);
+    }
+    protected draw(step_direction: number): void {
+        if(this.view.is_finished){
+            if(step_direction == 1){
+                if(this.answer_index == 0){
+                    this.view.set_text_color(0,0,'blue');
+                    this.view.set_text_color(4,0,'blue');
+                }
+                else if(this.answer_index == 1){
+
+                }
+
+                this.answer_index = Math.min(this.answer_index + 1,2);
+            }
+            else{
+                
+            }
+            
+        }
+        else{
+            this.view.draw(step_direction);
+        }
+
+        
+    }
+    public regenerate(): void {
+        let [m,n] = this.generate_initialize_number();
+        this.view.regenerate(m,n);
+        this.answer_index = 0;
+    }
+
+    protected generate_initialize_number():[number,number]{
+        return [0,0];
+    }
+
+}
+
+class Question_2 extends Multiply_11{
+    
+    protected generate_initialize_number() : [number,number]{
+
+        let m = Math.floor(Math.random() * 9) + 1; // [1,9]
+        let n = Math.floor(Math.random() * (10 - m)) ;
+        return [m * 10 + n,11]
+    }
+}
+
+class Question_3 extends Multiply_11{
+    
+    protected generate_initialize_number() : [number,number]{
+
+        let m = Math.floor(Math.random() * 88) + 12; // [11,99]
+        
+        return [m ,11]
+    }
+}
+
+
+class Question_4 extends Multiply_11{
+    
+    protected generate_initialize_number() : [number,number]{
+
+        let m = Math.floor(Math.random() * 888) + 112; // [111,999]
+        
+        return [m ,11]
+    }
+}
 
 
 export class Math_3_3 extends Container {
@@ -261,6 +390,19 @@ export class Math_3_3 extends Container {
             this.question = new Question_1("乘法的交换律");
             this.addChild(this.question)
         }
+        else if(this.question_index == 2){
+            this.question = new Question_2("乘法的小技巧 X 11");
+            this.addChild(this.question)
+        }
+        else if(this.question_index == 3){
+            this.question = new Question_3("乘法的小技巧 X 11");
+            this.addChild(this.question)
+        }
+        else if(this.question_index == 4){
+            this.question = new Question_4("乘法的小技巧 X 11");
+            this.addChild(this.question)
+        }
+
     }
     private regenerated(){
         if(this.question != null){
