@@ -309,6 +309,9 @@ class Multiply extends Container{
     public get_result_layer_index():number{
         return this.number_layer.length - 1;
     }
+    public get_label_count(layer_index:number){
+        return this.label_layer_count[layer_index];
+    }
     public set_text_color(layer_index:number,label_index:number,color_name:string):void{
         const label = this.get_label(layer_index,label_index);
         label.style = {'fill':color_name};
@@ -328,10 +331,11 @@ class Multiply extends Container{
 
 class Multiply_11 extends Question{
     private view! : Multiply;
-
+    private first_number : number = 0;
     constructor(title:string){
         super(title)
         let [m,n] = this.generate_initialize_number();
+        this.first_number = m
         this.view = new Multiply(m,n)
         this.addChild(this.view);
     }
@@ -339,8 +343,8 @@ class Multiply_11 extends Question{
         if(this.view.is_finished){
             if(step_direction == 1){
                 if(this.answer_index == 0){
-                    this.view.set_text_color(0,0,'blue');
-                    this.view.set_text_color(4,0,'blue');
+                    this.view.set_text_color(0,0,'yellow');
+                    this.view.set_text_color(4,0,'yellow');
 
                     let label = this.view.get_label(4,0);
                     let clone_label = this.clone_label(label);
@@ -360,6 +364,7 @@ class Multiply_11 extends Question{
                 }
 
                 else if(this.answer_index == 2){
+
                     let label = this.view.get_label(4,2);
                     let clone_label = this.clone_label(label);
                     const target_y = clone_label.y + 120 ;
@@ -378,7 +383,10 @@ class Multiply_11 extends Question{
 
                 }
                 else if(this.answer_index == 1){
-                    let label = this.view.get_label(4,1);
+                    
+                    const result_layer_index = this.view.get_result_layer_index();
+
+                    let label = this.view.get_label(result_layer_index,this.answer_index);
                     let clone_label = this.clone_label(label);
                     const target_y = clone_label.y + 90 ;
 
@@ -386,10 +394,13 @@ class Multiply_11 extends Question{
 
                     label = new Text();
                     label.text = "="
+                    label.style.fill = "white";
                     label.x = clone_label.x + 20;
                     label.y = target_y;
                     this.created_labes.push(label);
                     this.addChild(label);
+
+                    
 
                     //
                 }
