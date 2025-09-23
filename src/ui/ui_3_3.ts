@@ -26,6 +26,13 @@ class Question extends Container{
         
     }
     public regenerate():void{}
+
+    public tick(deltaTime:number):void{
+        this.tick_animation(deltaTime);
+    }
+    public tick_animation(deltaTime:number):void{
+
+    }
 }
 
 class Question_1 extends Question{
@@ -286,6 +293,15 @@ class Multiply extends Container{
     public get_result_layer_index():number{
         return this.number_layer.length - 1;
     }
+    public set_text_color(layer_index:number,label_index:number,color_name:string):void{
+        let offset_index = 0;
+        for(let i = 0; i < layer_index; ++i){
+            offset_index += this.label_layer_count[i]!;
+        }
+
+        const label = this.labels[offset_index + label_index]!;
+        label.style = {'fill':color_name};
+    }
 }
 
 class Multiply_11 extends Question{
@@ -318,9 +334,8 @@ class Multiply_11 extends Question{
         else{
             this.view.draw(step_direction);
         }
-
-        
     }
+   
     public regenerate(): void {
         let [m,n] = this.generate_initialize_number();
         this.view.regenerate(m,n);
@@ -382,6 +397,11 @@ export class Math_3_3 extends Container {
     private step_answer(direction:number){
         if(this.question != null){
             this.question.step(direction);
+        }
+    }
+    public tick(delta: number):void{
+        if(this.question != null){
+            this.question.tick(delta);
         }
     }
 
