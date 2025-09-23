@@ -1,5 +1,7 @@
-import { Container, Graphics, Text } from 'pixi.js';
+import { Container, Graphics, Text,Point } from 'pixi.js';
 import { Line } from '../component/line';
+
+import { type AnimationItem,type AnimationData ,AnimationSystem} from "../component/anim";
 
 function format(str: string, ...args: any[]) {
     return str.replace(/{(\d+)}/g, (match, index) => args[index]);
@@ -8,6 +10,12 @@ function format(str: string, ...args: any[]) {
 class Question extends Container{
     protected answer_index : number = 0;
     protected step_direction : number = 0;
+
+
+
+    protected created_labes : Text[] = [];
+
+    protected animation_system : AnimationSystem = new AnimationSystem();
     
     constructor(title:string){
         super()
@@ -31,8 +39,12 @@ class Question extends Container{
         this.tick_animation(deltaTime);
     }
     public tick_animation(deltaTime:number):void{
-
+        this.animation_system.tick(deltaTime);
     }
+    public is_playing_anim() :boolean{
+        return this.animation_system.is_playing_anim();
+    }
+    
 }
 
 class Question_1 extends Question{
@@ -66,6 +78,10 @@ class Question_1 extends Question{
         for(const label of this.labels){
             this.removeChild(label);
         }
+        for(const label of this.created_labes){
+            this.removeChild(label);
+        }
+        this.created_labes = [];
         this.labels = [];
         this.answer_index = 0;
         
@@ -294,14 +310,20 @@ class Multiply extends Container{
         return this.number_layer.length - 1;
     }
     public set_text_color(layer_index:number,label_index:number,color_name:string):void{
+        const label = this.get_label(layer_index,label_index);
+        label.style = {'fill':color_name};
+    }
+
+    public get_label(layer_index:number,label_index:number):Text{
         let offset_index = 0;
         for(let i = 0; i < layer_index; ++i){
             offset_index += this.label_layer_count[i]!;
         }
 
         const label = this.labels[offset_index + label_index]!;
-        label.style = {'fill':color_name};
+        return label;
     }
+    
 }
 
 class Multiply_11 extends Question{
@@ -319,12 +341,60 @@ class Multiply_11 extends Question{
                 if(this.answer_index == 0){
                     this.view.set_text_color(0,0,'blue');
                     this.view.set_text_color(4,0,'blue');
+
+                    let label = this.view.get_label(4,0);
+                    let clone_label = this.clone_label(label);
+                    
+                    this.move_to(clone_label,clone_label.x,clone_label.y + 60,3);
+                    const target_y = clone_label.y + 60;
+                    
+                    label = this.view.get_label(0,0);
+                    clone_label = this.clone_label(label);
+                    this.move_to(clone_label,clone_label.x + 60,target_y,2);
+                    label = new Text();
+                    label.text = "="
+                    label.x = clone_label.x + 20;
+                    label.y = target_y;
+                    this.created_labes.push(label);
+                    this.addChild(label);
+                }
+
+                else if(this.answer_index == 2){
+                    let label = this.view.get_label(4,2);
+                    let clone_label = this.clone_label(label);
+                    const target_y = clone_label.y + 120 ;
+                    this.move_to(clone_label,clone_label.x,target_y,2);
+
+                    label = this.view.get_label(0,1);
+                    clone_label = this.clone_label(label);
+                    this.move_to(clone_label,clone_label.x + 60,target_y,2);
+
+                    label = new Text();
+                    label.text = "="
+                    label.x = clone_label.x + 20;
+                    label.y = target_y;
+                    this.created_labes.push(label);
+                    this.addChild(label);
+
                 }
                 else if(this.answer_index == 1){
+                    let label = this.view.get_label(4,1);
+                    let clone_label = this.clone_label(label);
+                    const target_y = clone_label.y + 90 ;
 
+                    this.move_to(clone_label,clone_label.x,target_y,2);
+
+                    label = new Text();
+                    label.text = "="
+                    label.x = clone_label.x + 20;
+                    label.y = target_y;
+                    this.created_labes.push(label);
+                    this.addChild(label);
+
+                    //
                 }
 
-                this.answer_index = Math.min(this.answer_index + 1,2);
+                this.answer_index = Math.min(this.answer_index + 1,3);
             }
             else{
                 
@@ -345,6 +415,22 @@ class Multiply_11 extends Question{
     protected generate_initialize_number():[number,number]{
         return [0,0];
     }
+
+    public clone_label(src_label:Text):Text{
+        let label = new Text();
+        label.style = src_label.style;
+        label.text = src_label.text;
+        let position:Point = src_label.getGlobalPosition();
+    
+        label.position = this.toLocal(position,this);
+        this.addChild(label);
+        this.created_labes.push(label);
+        return label;
+    }
+    public move_to(src_widget:Text,x:number,y:number,seconds:number):void{
+        this.animation_system.move_to(src_widget,x,y,seconds);
+    }
+
 
 }
 

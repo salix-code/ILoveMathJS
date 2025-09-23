@@ -15,7 +15,7 @@ shape_3_2.x = 0;
 shape_3_2.y = 0; 
 
 app.ticker.add(() => {
-    shape_3_2.tick(app.ticker.deltaTime);
+    shape_3_2.tick(app.ticker.deltaTime / 10.0);
 });
 
 app.stage.addChild(shape_3_2);
