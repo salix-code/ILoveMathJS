@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js';
+import { Container, Graphics, Text,Point } from 'pixi.js';
 
 export class Expression extends Container{
     private m_expression:string[] = [];
@@ -23,7 +23,7 @@ export class Expression extends Container{
         }
     }
     private redraw():void{
-        this.clear();
+        //this.clear();
     
         for(let label of this.m_labels){
             this.addChild(label)

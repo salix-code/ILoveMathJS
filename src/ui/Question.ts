@@ -11,13 +11,13 @@ export class QuestionView extends Container{
         this.title_label.text = title
         this.title_label.x = 300;
         this.title_label.y = 20;
-        this.title_label.tag = "title";
+        this.title_label.label = "title";
         this.addChild(this.title_label)
 
     }
     public clean(){
         this.answer_index = 0;
-        const childrenToRemove = this.children.filter(child => child.tag == "title");
+        const childrenToRemove = this.children.filter(child => child.label == "title");
         for (const child of childrenToRemove) {
             this.removeChild(child);
         }

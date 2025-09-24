@@ -2,7 +2,7 @@ import { Container, Graphics, Text,Point } from 'pixi.js';
 
 import {Expression} from "../component/expression.js"
 import { AnimationSystem } from '../component/anim.js';
-import type { Arrow } from '../component/arrow.js';
+import { Arrow } from '../component/arrow.js';
 
 class Question extends Container{
     protected answer_index : number = 0;
@@ -15,13 +15,13 @@ class Question extends Container{
         this.title_label.text = title
         this.title_label.x = 300;
         this.title_label.y = 20;
-        this.title_label.tag = "title";
+        this.title_label.label = "title";
         this.addChild(this.title_label)
 
     }
     public clean(){
         this.answer_index = 0;
-        const childrenToRemove = this.children.filter(child => child.tag == "title");
+        const childrenToRemove = this.children.filter(child => child.label == "title");
         for (const child of childrenToRemove) {
             this.removeChild(child);
         }
@@ -35,7 +35,7 @@ class Question extends Container{
     
         label.position = this.toLocal(position,this);
         this.addChild(label);
-        this.created_labes.push(label);
+        
         return label;
     }
     public step(d:number){
@@ -56,13 +56,17 @@ class Question extends Container{
     }
 
     public make_arrow(x1:number,y1:number,x2:number,y2:number) : Arrow{
-        const arrow = new Arrow(x1, y1, x2, y2
+        const arrow = new Arrow(x1, y1, x2, y2,
             { color: 0xff0000, width: 2, headLength: 20 });
         this.addChild(arrow);
         return arrow;
     }
 
     public regenerate(){
+
+    }
+
+    public fly_to(view:Container,x:number,y:number,seconds:number){
 
     }
 
@@ -152,7 +156,7 @@ class Question_1 extends Question{
             
             this.fly_to(anim_label,target_position.x,target_position.y,2);
 
-            this.make_arrow(position,x,position.y,target_position.x,target_position.y);
+            this.make_arrow(position.x,position.y,target_position.x,target_position.y);
             this.make_arrow(second_position.x,second_position.y,target_position.x,target_position.y);
         }
     }
@@ -168,9 +172,9 @@ class Question_1 extends Question{
                 const target_label = this.created_expressions[0]!.get_label(indexes[i+2]!);
 
                 const target_position = target_label.getGlobalPosition();
-                this.fly_to(anim_label,target_position,2);
+                //this.fly_to(anim_label,target_position,2);
 
-                this.make_arrow(position,x,position.y,target_position.x,target_position.y);
+                //this.make_arrow(position.x,position.y,target_position.x,target_position.y);
             }
 
 
@@ -178,9 +182,8 @@ class Question_1 extends Question{
     }
     private answer_4(is_clear:boolean){
         if(is_clear){
-            this.
-        }
-        else{
+        
+        }else{
             const result = (this.first_dividend + this.second_dividend) / this.divisor;
             const expression = new Expression("(" + this.first_dividend + " + " + this.second_dividend + ") / " + this.divisor + " = " + result);
             this.created_expressions.push(expression);

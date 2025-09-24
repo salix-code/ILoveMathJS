@@ -342,6 +342,9 @@ class Multiply_11 extends Question{
     protected draw(step_direction: number): void {
         if(this.view.is_finished){
             if(step_direction == 1){
+                const result_layer_index = this.view.get_result_layer_index();
+                const result_layer_count = this.view.get_label_count(result_layer_index)!;
+                
                 if(this.answer_index == 0){
                     this.view.set_text_color(0,0,'yellow');
                     this.view.set_text_color(4,0,'yellow');
@@ -363,7 +366,7 @@ class Multiply_11 extends Question{
                     this.addChild(label);
                 }
 
-                else if(this.answer_index == 2){
+                else if(this.answer_index == result_layer_count - 1){
 
                     let label = this.view.get_label(4,2);
                     let clone_label = this.clone_label(label);
@@ -382,25 +385,69 @@ class Multiply_11 extends Question{
                     this.addChild(label);
 
                 }
-                else if(this.answer_index == 1){
+                else if(this.answer_index < result_layer_count - 1){
                     
                     const result_layer_index = this.view.get_result_layer_index();
 
                     let label = this.view.get_label(result_layer_index,this.answer_index);
                     let clone_label = this.clone_label(label);
-                    const target_y = clone_label.y + 90 ;
+                    let target_y = clone_label.y + 90 ;
+                    let begin_x = clone_label.x;
+                    this.move_to(clone_label,begin_x,target_y,2);
 
-                    this.move_to(clone_label,clone_label.x,target_y,2);
+                    label = this.view.get_label(0,this.answer_index - 1);
+                    clone_label = this.clone_label(label);
+                    const m : number = Number(clone_label.text);
+                    target_y = clone_label.y + 90 ;
+                    this.move_to(clone_label,begin_x + 20,target_y,2);
+
+                    label = new Text();
+                    label.text = "+"
+                    label.style.fill = "white";
+                    label.x = begin_x + 40;
+                    label.y = target_y;
+                    this.addChild(label);
+                    this.created_labes.push(label);
+
+                    label = this.view.get_label(0,this.answer_index);
+                    clone_label = this.clone_label(label);
+                    const n : number = Number(clone_label.text);
+                    target_y = clone_label.y + 90 ;
+                    this.move_to(clone_label,begin_x + 60,target_y,2);
 
                     label = new Text();
                     label.text = "="
                     label.style.fill = "white";
-                    label.x = clone_label.x + 20;
+                    label.x = begin_x + 80;
                     label.y = target_y;
-                    this.created_labes.push(label);
                     this.addChild(label);
+                    this.created_labes.push(label);
 
-                    
+                    begin_x = begin_x + 100
+                    let r = m + n;
+                    while(r > 0){
+                        const x = r % 10;
+
+                        label = new Text();
+                        label.text = "+"
+                        label.style.fill = "white";
+                        label.x = begin_x + 20;
+                        label.y = target_y;
+                        this.addChild(label);
+                        this.created_labes.push(label);
+
+                        label = new Text();
+                        label.text = x + ""
+                        label.style.fill = "white";
+                        label.x = begin_x + 40;
+                        label.y = target_y;
+                        this.addChild(label);
+                        this.created_labes.push(label);
+
+                        r = Math.floor(r / 10);
+
+                        begin_x += 40;
+                    }
 
                     //
                 }
