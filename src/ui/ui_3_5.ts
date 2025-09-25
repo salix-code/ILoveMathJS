@@ -1,5 +1,5 @@
 import { Container, Graphics, Text,Point } from 'pixi.js';
-import {QuestionView,QuestionController} from "./Question"
+import {QuestionView,QuestionController} from "../class/Question"
 
 class Question_1 extends QuestionView{
     constructor(title:string) {
