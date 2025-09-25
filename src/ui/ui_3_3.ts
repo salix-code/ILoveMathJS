@@ -2,6 +2,7 @@ import { Container, Graphics, Text,Point } from 'pixi.js';
 import { Line } from '../component/line';
 
 import { type AnimationItem,type AnimationData ,AnimationSystem} from "../component/anim";
+import { Arrow } from '../component/arrow';
 
 function format(str: string, ...args: any[]) {
     return str.replace(/{(\d+)}/g, (match, index) => args[index]);
@@ -349,21 +350,33 @@ class Multiply_11 extends Question{
                     this.view.set_text_color(0,0,'yellow');
                     this.view.set_text_color(4,0,'yellow');
 
-                    let label = this.view.get_label(4,0);
+                    let label = this.view.get_label(result_layer_index,0);
                     let clone_label = this.clone_label(label);
-                    
-                    this.move_to(clone_label,clone_label.x,clone_label.y + 60,3);
-                    const target_y = clone_label.y + 60;
+                    const target_y = clone_label.y + 50;
+                    const begin_x = clone_label.x;
+                    this.move_to(clone_label,clone_label.x,target_y,3);
+
+                    let arrow = new Arrow(label.x,label.y,begin_x,target_y);
+                    this.addChild(arrow);
+
+                    label = new Text();
+                    label.text = "="
+                    label.x = begin_x + 20;
+                    label.y = target_y;
+                    this.created_labes.push(label);
+                    this.addChild(label);
                     
                     label = this.view.get_label(0,0);
                     clone_label = this.clone_label(label);
                     this.move_to(clone_label,clone_label.x + 60,target_y,2);
                     label = new Text();
                     label.text = "="
-                    label.x = clone_label.x + 20;
+                    label.x = begin_x + 40;
                     label.y = target_y;
                     this.created_labes.push(label);
                     this.addChild(label);
+
+
                 }
 
                 else if(this.answer_index == result_layer_count - 1){
@@ -388,17 +401,16 @@ class Multiply_11 extends Question{
                 else if(this.answer_index < result_layer_count - 1){
                     
                     const result_layer_index = this.view.get_result_layer_index();
-
+                    
                     let label = this.view.get_label(result_layer_index,this.answer_index);
                     let clone_label = this.clone_label(label);
-                    let target_y = clone_label.y + 90 ;
+                    const target_y = clone_label.y + 80 ;
                     let begin_x = clone_label.x;
                     this.move_to(clone_label,begin_x,target_y,2);
 
                     label = this.view.get_label(0,this.answer_index - 1);
                     clone_label = this.clone_label(label);
                     const m : number = Number(clone_label.text);
-                    target_y = clone_label.y + 90 ;
                     this.move_to(clone_label,begin_x + 20,target_y,2);
 
                     label = new Text();
@@ -412,7 +424,6 @@ class Multiply_11 extends Question{
                     label = this.view.get_label(0,this.answer_index);
                     clone_label = this.clone_label(label);
                     const n : number = Number(clone_label.text);
-                    target_y = clone_label.y + 90 ;
                     this.move_to(clone_label,begin_x + 60,target_y,2);
 
                     label = new Text();
