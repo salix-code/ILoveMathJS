@@ -1,9 +1,11 @@
 import { Container, Graphics, Text,Point } from 'pixi.js';
 import {QuestionView,QuestionController} from "../class/Question"
 import { Expression } from '../component/expression';
+import type { ISystem } from '../system/system';
 
 class Question_1 extends QuestionView{
     private expression:Expression[] = [];
+    
     constructor(title:string) {
         super(title);
         this.draw_answer_function = [
