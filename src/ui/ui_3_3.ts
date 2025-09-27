@@ -3,6 +3,7 @@ import { Line } from '../component/line';
 
 import { type AnimationItem,type AnimationData ,AnimationSystem} from "../component/anim";
 import { Arrow } from '../component/arrow';
+import { Helper } from '../class/Help';
 
 function format(str: string, ...args: any[]) {
     return str.replace(/{(\d+)}/g, (match, index) => args[index]);
@@ -330,9 +331,27 @@ class Multiply extends Container{
     
 }
 
+type ActionDesc = {
+    tag : string,
+    view :Text,
+    color : string,
+    x:number,
+    y:number,
+}
+
+type AnswerLineDesc = {
+    
+}
+
+
 class Multiply_11 extends Question{
     private view! : Multiply;
     private first_number : number = 0;
+
+    private m_actions : ActionDesc[] = [];
+
+    private need_add_value : number = 0;
+
     constructor(title:string){
         super(title)
         let [m,n] = this.generate_initialize_number();
@@ -340,24 +359,52 @@ class Multiply_11 extends Question{
         this.view = new Multiply(m,n)
         this.addChild(this.view);
     }
+
+    private run_actions(){
+        for(let action of this.m_actions){
+            if(action.tag == "generate_arrow"){
+                action.view.fill.color = action.color;
+                let clone_label = this.clone_label(action.view);
+                const base_x = action.view.x;
+                const base_y = action.view.y;
+                this.move_to(clone_label,base_x + action.x ,base_y + action.y,3);
+                
+                const arrow = Helper.make_arrow(clone_label,base_x + action.x,base_y + action.y);
+                this.addChild(arrow);
+            }
+        }
+
+        this.m_actions = [];
+    }
+
     protected draw(step_direction: number): void {
         if(this.view.is_finished){
             if(step_direction == 1){
                 const result_layer_index = this.view.get_result_layer_index();
                 const result_layer_count = this.view.get_label_count(result_layer_index)!;
-                
+
                 if(this.answer_index == 0){
-                    this.view.set_text_color(0,0,'yellow');
-                    this.view.set_text_color(4,0,'yellow');
+                    this.m_actions.push({
+                        tag: "generate_arrow",
+                        view: this.view.get_label(0,0),
+                        color: 'yellow',
+                        x: 120,
+                        y: 50
+                    });
+
+                    this.m_actions.push({
+                        tag: "generate_arrow",
+                        view: this.view.get_label(result_layer_index,0),
+                        color: 'yellow',
+                        x: 0,
+                        y: 50
+                    });
+
+                    this.run_actions();
 
                     let label = this.view.get_label(result_layer_index,0);
-                    let clone_label = this.clone_label(label);
-                    const target_y = clone_label.y + 50;
-                    const begin_x = clone_label.x;
-                    this.move_to(clone_label,clone_label.x,target_y,3);
-
-                    let arrow = new Arrow(label.x,label.y,begin_x,target_y);
-                    this.addChild(arrow);
+                    const target_y = label.y + 50;
+                    const begin_x = label.x;
 
                     label = new Text();
                     label.text = "="
@@ -366,100 +413,133 @@ class Multiply_11 extends Question{
                     this.created_labes.push(label);
                     this.addChild(label);
                     
-                    label = this.view.get_label(0,0);
-                    clone_label = this.clone_label(label);
-                    this.move_to(clone_label,clone_label.x + 60,target_y,2);
-                    label = new Text();
-                    label.text = "="
-                    label.x = begin_x + 40;
-                    label.y = target_y;
-                    this.created_labes.push(label);
-                    this.addChild(label);
-
-
                 }
 
                 else if(this.answer_index == result_layer_count - 1){
+                    const first_layer_count = this.view.get_label_count(0)!;
+                    let label = this.view.get_label(result_layer_index,this.answer_index - 1);
+                    const base_x:number = label.x;
+                    const base_y:number = label.y + 80;
 
-                    let label = this.view.get_label(4,2);
-                    let clone_label = this.clone_label(label);
-                    const target_y = clone_label.y + 120 ;
-                    this.move_to(clone_label,clone_label.x,target_y,2);
+                    this.m_actions.push({
+                        tag: "generate_arrow",
+                        view: label,
+                        color: 'yellow',
+                        x: 0,
+                        y: 120
+                    });
 
-                    label = this.view.get_label(0,1);
-                    clone_label = this.clone_label(label);
-                    this.move_to(clone_label,clone_label.x + 60,target_y,2);
+                    label = this.view.get_label(0,first_layer_count - 1);
+                    
+                    this.m_actions.push({
+                        tag: "generate_arrow",
+                        view: label,
+                        color: 'yellow',
+                        x: 20,
+                        y: 120
+                    });
 
+                    this.run_actions();
+                    
                     label = new Text();
                     label.text = "="
-                    label.x = clone_label.x + 20;
-                    label.y = target_y;
+                    label.x = base_x + 20;
+                    label.y = base_y;
                     this.created_labes.push(label);
                     this.addChild(label);
 
-                }
-                else if(this.answer_index < result_layer_count - 1){
-                    
-                    const result_layer_index = this.view.get_result_layer_index();
-                    
-                    let label = this.view.get_label(result_layer_index,this.answer_index);
-                    let clone_label = this.clone_label(label);
-                    const target_y = clone_label.y + 80 ;
-                    let begin_x = clone_label.x;
-                    this.move_to(clone_label,begin_x,target_y,2);
-
-                    label = this.view.get_label(0,this.answer_index - 1);
-                    clone_label = this.clone_label(label);
-                    const m : number = Number(clone_label.text);
-                    this.move_to(clone_label,begin_x + 20,target_y,2);
-
-                    label = new Text();
-                    label.text = "+"
-                    label.style.fill = "white";
-                    label.x = begin_x + 40;
-                    label.y = target_y;
-                    this.addChild(label);
-                    this.created_labes.push(label);
-
-                    label = this.view.get_label(0,this.answer_index);
-                    clone_label = this.clone_label(label);
-                    const n : number = Number(clone_label.text);
-                    this.move_to(clone_label,begin_x + 60,target_y,2);
-
-                    label = new Text();
-                    label.text = "="
-                    label.style.fill = "white";
-                    label.x = begin_x + 80;
-                    label.y = target_y;
-                    this.addChild(label);
-                    this.created_labes.push(label);
-
-                    begin_x = begin_x + 100
-                    let r = m + n;
-                    while(r > 0){
-                        const x = r % 10;
+                    if(this.need_add_value == 1){
 
                         label = new Text();
                         label.text = "+"
-                        label.style.fill = "white";
-                        label.x = begin_x + 20;
-                        label.y = target_y;
-                        this.addChild(label);
+                        label.x = base_x + 60;
+                        label.y = base_y;
                         this.created_labes.push(label);
+                        this.addChild(label);
 
                         label = new Text();
-                        label.text = x + ""
-                        label.style.fill = "white";
-                        label.x = begin_x + 40;
-                        label.y = target_y;
-                        this.addChild(label);
+                        label.text = "1"
+                        label.x = base_x + 80;
+                        label.y = base_y;
                         this.created_labes.push(label);
+                        this.addChild(label);
 
-                        r = Math.floor(r / 10);
-
-                        begin_x += 40;
+                        this.need_add_value = 0;
                     }
+                }
+                else if(this.answer_index < result_layer_count - 1){
+                    
+                    let label = this.view.get_label(result_layer_index,this.answer_index - 1);
+                    const base_x:number = label.x;
+                    const base_y:number = label.y + 80;
+                    this.m_actions.push({
+                        tag: "generate_arrow",
+                        view: label,
+                        color: 'red',
+                        x: 0,
+                        y: 80
+                    });
 
+                    label = this.view.get_label(0,this.answer_index);
+                    const m = Number(label.text);
+                    this.m_actions.push({
+                        tag: "generate_arrow",
+                        view: label,
+                        color: 'red',
+                        x: 40,
+                        y: 80
+                    });
+                    label = this.view.get_label(0,this.answer_index - 1);
+                    const n = Number(label.text);
+                    this.m_actions.push({
+                        tag: "generate_arrow",
+                        view: label,
+                        color: 'red',
+                        x: 80,
+                        y: 80
+                    });
+
+                    this.run_actions();
+                    
+                    label = new Text();
+                    label.text = "="
+                    label.x = base_x + 20;
+                    label.y = base_y;
+                    this.created_labes.push(label);
+                    this.addChild(label);
+
+                    label = new Text();
+                    label.text = "+"
+                    label.x = base_x + 60;
+                    label.y = base_y;
+                    this.created_labes.push(label);
+                    this.addChild(label);
+                    
+                    if(m + n + this.need_add_value >= 10){
+                        label = new Text();
+                        label.text = "1"
+                        label.x = base_x - 20;
+                        label.y = base_y;
+                        this.created_labes.push(label);
+                        this.addChild(label);
+                    }
+                    if(this.need_add_value == 1){
+                        label = new Text();
+                        label.text = "+"
+                        label.x = base_x + 60;
+                        label.y = base_y;
+                        this.created_labes.push(label);
+                        this.addChild(label);
+
+                        label = new Text();
+                        label.text = "1"
+                        label.x = base_x + 80;
+                        label.y = base_y;
+                        this.created_labes.push(label);
+                        this.addChild(label);
+
+                        this.need_add_value = 0;
+                    }
                     //
                 }
 

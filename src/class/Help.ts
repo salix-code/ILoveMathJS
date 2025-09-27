@@ -48,7 +48,7 @@ function getRectLineIntersection(
     };
 }
 
-export class Help {
+export class Helper {
     public static make_arrow(view:Container,x:number,y:number){
         const point:Point = view.getGlobalPosition();
         const bounds = view.getLocalBounds();

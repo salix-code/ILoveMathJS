@@ -2,6 +2,7 @@ import { Container, Graphics, Text,Point } from 'pixi.js';
 import {QuestionView,QuestionController} from "../class/Question"
 import { Expression } from '../component/expression';
 import type { ISystem } from '../system/system';
+import { ExpressionSystem ,type ExpressionConfig} from '../system/expressionsystem';
 
 class Question_1 extends QuestionView{
     private expression:Expression[] = [];
@@ -11,6 +12,7 @@ class Question_1 extends QuestionView{
         this.draw_answer_function = [
             
         ]
+        this.add_system(new ExpressionSystem(this));
         this.init_view();
     }
     public regenerate(): void {
@@ -18,19 +20,25 @@ class Question_1 extends QuestionView{
         this.init_view();
     }
     private init_view(){
-        const expression_string = ["A + B = 5","A - B = 3","A = ?","B = ?"];
-        for(let it of expression_string){
-            const expression = new Expression(it);
-            expression.x = 300;
-            expression.y = 200;
-            this.addChild(expression);
-            this.expression.push(expression);
-        }
+        
+        this.add_component({
+            tag : "ExpressionConfig",
+            expression : "A + B = 5"
+        });
+
+        this.add_component({
+            tag : "ExpressionConfig",
+            expression : "A - B = 3"
+        });
+        this.add_component({
+            tag : "ExpressionConfig",
+            expression : "A = ?"
+        });
+        this.add_component({
+            tag : "ExpressionConfig",
+            expression : "B = ?"
+        });
     }
-
-
-
-
 };
 
 export class Controller extends QuestionController{
