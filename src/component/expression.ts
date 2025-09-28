@@ -45,6 +45,11 @@ export class Expression extends Container{
         this.removeChild(label);
         this.redraw();
     }
+
+    public change_label_color(index:number,color:string){
+        let label = this.get_label(index)!;
+        label.style.fill = color;
+    }
     
 }
 
