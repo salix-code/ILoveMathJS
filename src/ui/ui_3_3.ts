@@ -183,15 +183,7 @@ class Question_1 extends Question{
     }
 }
 
-/**
- * 0 1
- * 2 3
- * 4 5
- * 6 7
- * 9 8
- */
 
-// m * n
 class Multiply extends Container{
     private labels:Text[] = [];
     private number_layer : number[] = [];
@@ -329,27 +321,12 @@ class Multiply extends Container{
         return label;
     }
     
-}
-
-type ActionDesc = {
-    tag : string,
-    view :Text,
-    color : string,
-    x:number,
-    y:number,
-}
-
-type AnswerLineDesc = {
-    
-}
+};
 
 
 class Multiply_11 extends Question{
     private view! : Multiply;
     private first_number : number = 0;
-
-    private m_actions : ActionDesc[] = [];
-
     private need_add_value : number = 0;
 
     constructor(title:string){
@@ -360,190 +337,101 @@ class Multiply_11 extends Question{
         this.addChild(this.view);
     }
 
-    private run_actions(){
-        for(let action of this.m_actions){
-            if(action.tag == "generate_arrow"){
-                action.view.fill.color = action.color;
-                let clone_label = this.clone_label(action.view);
-                const base_x = action.view.x;
-                const base_y = action.view.y;
-                this.move_to(clone_label,base_x + action.x ,base_y + action.y,3);
-                
-                const arrow = Helper.make_arrow(clone_label,base_x + action.x,base_y + action.y);
-                this.addChild(arrow);
-            }
-        }
+    private run_actionn(){
+        const result_layer_index = this.view.get_result_layer_index()!;
+        const first_layer_count = this.view.get_label_count(0)!;
+        let label = this.view.get_label(result_layer_index,this.answer_index)!
+        label.style.fill = 'yellow'
+        let anim_label = this.clone_label(label);
+        const base_x = anim_label.x;
+        const base_y = anim_label.y + 30 + this.answer_index * 30;
+        let offset_x = base_x;
+        this.move_to(anim_label,offset_x,base_y,2);
+        offset_x += 20;
 
-        this.m_actions = [];
+        let arrow = Helper.make_arrow(label,base_x,base_y);
+        this.addChild(arrow);
+
+        label = new Text();
+        label.text = "="
+        label.style.fill = 'white'
+        label.x = offset_x;
+        label.y = base_y;
+        this.created_labes.push(label);
+        this.addChild(label);
+        offset_x += 20;
+
+        let t = 0;
+        if(this.answer_index < first_layer_count){
+            label = this.view.get_label(0,this.answer_index)!;
+            t += Number(label.text);
+            anim_label = this.clone_label(label);
+            this.move_to(anim_label,offset_x,base_y,2);
+            offset_x += 20;
+        }
+        
+
+        if(this.answer_index > 0 && this.answer_index < first_layer_count){
+
+            label = new Text();
+            label.text = "+"
+            label.style.fill = 'white'
+            label.x = offset_x;
+            label.y = base_y;
+            this.created_labes.push(label);
+            this.addChild(label);
+            offset_x += 20;
+        }
+        if(this.answer_index > 0){
+            label = this.view.get_label(0,this.answer_index - 1)!;
+            t += Number(label.text);
+            anim_label = this.clone_label(label);
+            this.move_to(anim_label,offset_x,base_y,2);
+            offset_x += 20;
+        }       
+        if(this.need_add_value){
+            t += this.need_add_value;
+            label = new Text();
+            label.text = "+"
+            label.style.fill = 'white'
+            label.x = offset_x;
+            label.y = base_y;
+            this.created_labes.push(label);
+            this.addChild(label);
+            offset_x += 20;
+
+            label = new Text();
+            label.text = this.need_add_value + "";
+            label.style.fill = 'white'
+            label.x = offset_x;
+            label.y = base_y;
+            this.created_labes.push(label);
+            this.addChild(label);
+            offset_x += 20;
+        }
+        
+        if (t >= 10 ){
+            this.need_add_value = 1;
+            label = new Text();
+            label.text = "1"
+            label.style.fill = 'white'
+            label.x = base_x - 15;
+            label.y = base_y;
+            this.created_labes.push(label);
+            this.addChild(label);
+        }
     }
 
     protected draw(step_direction: number): void {
         if(this.view.is_finished){
             if(step_direction == 1){
-                const result_layer_index = this.view.get_result_layer_index();
-                const result_layer_count = this.view.get_label_count(result_layer_index)!;
-
-                if(this.answer_index == 0){
-                    this.m_actions.push({
-                        tag: "generate_arrow",
-                        view: this.view.get_label(0,0),
-                        color: 'yellow',
-                        x: 120,
-                        y: 50
-                    });
-
-                    this.m_actions.push({
-                        tag: "generate_arrow",
-                        view: this.view.get_label(result_layer_index,0),
-                        color: 'yellow',
-                        x: 0,
-                        y: 50
-                    });
-
-                    this.run_actions();
-
-                    let label = this.view.get_label(result_layer_index,0);
-                    const target_y = label.y + 50;
-                    const begin_x = label.x;
-
-                    label = new Text();
-                    label.text = "="
-                    label.x = begin_x + 20;
-                    label.y = target_y;
-                    this.created_labes.push(label);
-                    this.addChild(label);
-                    
+                
+                const first_layer_count = this.view.get_label_count(0)!;
+                if(this.answer_index < first_layer_count + 1){
+                    this.run_actionn();
+                    this.answer_index = Math.min(this.answer_index + 1,first_layer_count + 1);
                 }
-
-                else if(this.answer_index == result_layer_count - 1){
-                    const first_layer_count = this.view.get_label_count(0)!;
-                    let label = this.view.get_label(result_layer_index,this.answer_index - 1);
-                    const base_x:number = label.x;
-                    const base_y:number = label.y + 80;
-
-                    this.m_actions.push({
-                        tag: "generate_arrow",
-                        view: label,
-                        color: 'yellow',
-                        x: 0,
-                        y: 120
-                    });
-
-                    label = this.view.get_label(0,first_layer_count - 1);
-                    
-                    this.m_actions.push({
-                        tag: "generate_arrow",
-                        view: label,
-                        color: 'yellow',
-                        x: 20,
-                        y: 120
-                    });
-
-                    this.run_actions();
-                    
-                    label = new Text();
-                    label.text = "="
-                    label.x = base_x + 20;
-                    label.y = base_y;
-                    this.created_labes.push(label);
-                    this.addChild(label);
-
-                    if(this.need_add_value == 1){
-
-                        label = new Text();
-                        label.text = "+"
-                        label.x = base_x + 60;
-                        label.y = base_y;
-                        this.created_labes.push(label);
-                        this.addChild(label);
-
-                        label = new Text();
-                        label.text = "1"
-                        label.x = base_x + 80;
-                        label.y = base_y;
-                        this.created_labes.push(label);
-                        this.addChild(label);
-
-                        this.need_add_value = 0;
-                    }
-                }
-                else if(this.answer_index < result_layer_count - 1){
-                    
-                    let label = this.view.get_label(result_layer_index,this.answer_index - 1);
-                    const base_x:number = label.x;
-                    const base_y:number = label.y + 80;
-                    this.m_actions.push({
-                        tag: "generate_arrow",
-                        view: label,
-                        color: 'red',
-                        x: 0,
-                        y: 80
-                    });
-
-                    label = this.view.get_label(0,this.answer_index);
-                    const m = Number(label.text);
-                    this.m_actions.push({
-                        tag: "generate_arrow",
-                        view: label,
-                        color: 'red',
-                        x: 40,
-                        y: 80
-                    });
-                    label = this.view.get_label(0,this.answer_index - 1);
-                    const n = Number(label.text);
-                    this.m_actions.push({
-                        tag: "generate_arrow",
-                        view: label,
-                        color: 'red',
-                        x: 80,
-                        y: 80
-                    });
-
-                    this.run_actions();
-                    
-                    label = new Text();
-                    label.text = "="
-                    label.x = base_x + 20;
-                    label.y = base_y;
-                    this.created_labes.push(label);
-                    this.addChild(label);
-
-                    label = new Text();
-                    label.text = "+"
-                    label.x = base_x + 60;
-                    label.y = base_y;
-                    this.created_labes.push(label);
-                    this.addChild(label);
-                    
-                    if(m + n + this.need_add_value >= 10){
-                        label = new Text();
-                        label.text = "1"
-                        label.x = base_x - 20;
-                        label.y = base_y;
-                        this.created_labes.push(label);
-                        this.addChild(label);
-                    }
-                    if(this.need_add_value == 1){
-                        label = new Text();
-                        label.text = "+"
-                        label.x = base_x + 60;
-                        label.y = base_y;
-                        this.created_labes.push(label);
-                        this.addChild(label);
-
-                        label = new Text();
-                        label.text = "1"
-                        label.x = base_x + 80;
-                        label.y = base_y;
-                        this.created_labes.push(label);
-                        this.addChild(label);
-
-                        this.need_add_value = 0;
-                    }
-                    //
-                }
-
-                this.answer_index = Math.min(this.answer_index + 1,3);
+                
             }
             else{
                 
@@ -554,11 +442,17 @@ class Multiply_11 extends Question{
             this.view.draw(step_direction);
         }
     }
-   
+    private clean_ui(){
+        for(let label of this.created_labes){
+            this.removeChild(label);
+        }
+        this.created_labes = [];
+    }
     public regenerate(): void {
         let [m,n] = this.generate_initialize_number();
         this.view.regenerate(m,n);
         this.answer_index = 0;
+        this.clean_ui();
     }
 
     protected generate_initialize_number():[number,number]{

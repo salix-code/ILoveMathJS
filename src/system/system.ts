@@ -30,7 +30,7 @@ export class SystemManager{
                 if(data.update_state == 0){
                     continue;
                 }
-                if(system.filter(data.component.tag)){
+                if(system.filter(data.config.tag)){
                     system.update(data,delta);
                     data.update_state = 0;
                 }

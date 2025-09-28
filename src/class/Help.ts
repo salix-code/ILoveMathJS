@@ -42,10 +42,7 @@ function getRectLineIntersection(
     // 正常情况中心肯定在内部，选 tExit
     const t = tExit > 0 ? tExit : tEnter; //确保是从中心出发
 
-    return {
-        x: center.x + dx * t,
-        y: center.y + dy * t
-    };
+    return new Point(center.x + dx * t,center.y + dy * t);
 }
 
 export class Helper {
@@ -62,12 +59,12 @@ export class Helper {
         const rectB = { x: x, y: y, w: bounds.x, h: bounds.y };
 
         // 中心点
-        const centerA = { x: rectA.x + rectA.w / 2, y: rectA.y + rectA.h / 2 };
-        const centerB = { x: rectB.x + rectB.w / 2, y: rectB.y + rectB.h / 2 };
+        const centerA = new Point(rectA.x + rectA.w / 2,rectA.y + rectA.h / 2);
+        const centerB = new Point( rectB.x + rectB.w / 2,  rectB.y + rectB.h / 2);
 
         // 相交点
-        const pA = getRectLineIntersection(rectA, centerA, centerB);
-        const pB = getRectLineIntersection(rectB, centerB, centerA);
+        const pA = getRectLineIntersection(rectA, centerA, centerB)!;
+        const pB = getRectLineIntersection(rectB, centerB, centerA)!;
 
         return new Arrow(pA.x,pA.y,pB.x,pB.y);
     }

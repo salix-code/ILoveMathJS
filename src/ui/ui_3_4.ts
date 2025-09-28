@@ -11,17 +11,8 @@ class Question extends QuestionView{
     constructor(title:string){
         super(title);
     }
-    public clone_label(src_label:Text):Text{
-        let label = new Text();
-        label.style = src_label.style;
-        label.text = src_label.text;
-        let position:Point = src_label.getGlobalPosition();
     
-        label.position = this.toLocal(position,this);
-        this.addChild(label);
-        this.created_labes.push(label);
-        return label;
-    }
+    
 }
 
 class Question_1 extends QuestionView{
@@ -45,6 +36,17 @@ class Question_1 extends QuestionView{
         ];
 
         this.regenerate();
+    }
+    public clone_label(src_label:Text):Text{
+        let label = new Text();
+        label.style = src_label.style;
+        label.text = src_label.text;
+        let position:Point = src_label.getGlobalPosition();
+    
+        label.position = this.toLocal(position,this);
+        this.addChild(label);
+        //this.created_labes.push(label);
+        return label;
     }
     public regenerate(){
         this.clean();
@@ -106,10 +108,10 @@ class Question_1 extends QuestionView{
             let target_position = target_label.getGlobalPosition();
             expression.remove_label(-1);
             
-            this.fly_to(anim_label,target_position.x,target_position.y,2);
+            //this.fly_to(anim_label,target_position.x,target_position.y,2);
 
-            this.make_arrow(position.x,position.y,target_position.x,target_position.y);
-            this.make_arrow(second_position.x,second_position.y,target_position.x,target_position.y);
+            //this.make_arrow(position.x,position.y,target_position.x,target_position.y);
+            //this.make_arrow(second_position.x,second_position.y,target_position.x,target_position.y);
         }
     }
     private answer_3(is_clear:boolean){
