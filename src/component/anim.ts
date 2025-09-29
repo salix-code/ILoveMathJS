@@ -16,11 +16,19 @@ export type AnimationData = {
 }
 
 export class AnimationSystem {
+    private static instance: AnimationSystem;
+
     protected items: AnimationItem[] = [];
     protected datas: AnimationData[] = [];
 
     constructor(){
 
+    }
+    public static getInstance(): AnimationSystem {
+        if (!AnimationSystem.instance) {
+            AnimationSystem.instance = new AnimationSystem();
+        }
+        return AnimationSystem.instance;
     }
 
     public is_playing_anim() : boolean {

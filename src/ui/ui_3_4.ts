@@ -6,13 +6,9 @@ import { Arrow } from '../component/arrow.js';
 import { QuestionController, QuestionView } from '../class/Question.js';
 import { SystemManager } from '../system/system.js';
 import { ExpressionSystem} from '../system/expressionsystem.js';
+import { ActionManager } from '../actions/actionmanager.js';
+import type { CloneAndMoveToConfig } from '../actions/action.js';
 
-
-type ExpressionConfig = {
-    expression:string,
-    x:number,
-    y:number,
-}
 
 type ExpressionData = {
     expression :Expression,
@@ -29,6 +25,7 @@ class Question_1 extends QuestionView{
 
     private m_expression : ExpressionData[] = [];
 
+    protected animation_system : AnimationSystem = new AnimationSystem();
 
     constructor(title:string) {
         super(title)
@@ -97,9 +94,14 @@ class Question_1 extends QuestionView{
             data_item = this.m_expression[1]!;
             label = data_item.expression.get_label(6)!
             const point = label.getGlobalPosition()
-            this.clone_and_move_to(label,point);
-
-            
+            const action_manager = ActionManager.getInstance();
+            action_manager.run({
+                stage : this,
+                label:label,
+                animation_system:this.animation_system,
+                target_x:10,
+                target_y:20,
+            } as CloneAndMoveToConfig);
         }
     }
     private answer_3(is_clear:boolean){
@@ -107,13 +109,22 @@ class Question_1 extends QuestionView{
 
         }
         else{
-            const indexes =[0,4,0,2];
-            for(let i = 0; i < 2; ++i){
-                const dividend = this.expression.get_label(indexes[i]!)!;
-                const anim_label = this.clone_label(dividend);
-                const target_label = this.created_expressions[0]!.get_label(indexes[i+2]!);
+            const action_manager = ActionManager.getInstance();
 
-                const target_position = target_label.getGlobalPosition();
+            const indexes =[0,1,4,3];
+            for(let i = 0; i < 2; ++i){
+                let data_item:ExpressionData = this.m_expression[0]!;
+                let label = data_item.expression.get_label(i);
+                data_item = this.m_expression[i]!;
+                const target_label = data_item.expression.get_label(i + 1)!
+                const target_point = target_label.getGlobalPosition();
+                action_manager.run({
+                    stage : this,
+                    label:label,
+                    animation_system:this.animation_system,
+                    target_x:target_point.x,
+                    target_y:target_point.y,
+                } as CloneAndMoveToConfig);
                 
             }
 
@@ -135,6 +146,46 @@ class Question_1 extends QuestionView{
     
 }
 
+class Question_2 extends QuestionView{
+    private m_dividends:number[] = []
+    private m_divisor : number = 0;
+    private m_expression : ExpressionData[] = [];
+
+
+    constructor(title:string){
+        super(title);
+        this.draw_answer_function = [
+            this.answer_0.bind(this),
+            this.answer_1.bind(this),
+            this.answer_2.bind(this),
+            this.answer_3.bind(this),
+            this.answer_4.bind(this),
+        ];
+        this.regenerate();
+    }
+    public regenerate(): void {
+        this.clean();
+        
+        let expression = "( ";
+        for(let x of this.m_dividends){
+            expression += x + " + "
+        }
+        if(this.m_dividends.length > 0){
+            expression = expression.slice(0,-3);
+        }
+        expression += " / " + this.m_divisor;
+
+
+    }
+
+    private create_expression(){
+
+    }
+
+    private answer_0(){
+
+    }
+}
 
 export class Math_3_4 extends QuestionController {
     
@@ -144,6 +195,9 @@ export class Math_3_4 extends QuestionController {
         this.question_templates.push({
             template:Question_1,
             title:"除法取公共因子"
+        },{
+            template:Question_2,
+            title:"除法拆式"
         })
         
     }

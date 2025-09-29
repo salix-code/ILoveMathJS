@@ -1,3 +1,4 @@
+import { CloneAndMoveToRunner } from "./clone_and_move_to";
 
 export interface ActionConfig{
     tag:string;
@@ -15,7 +16,7 @@ export class ActionManager{
     private static instance: ActionManager;
     private m_action_runners: Map<string,ActionRunner> = new Map();
     constructor(){
-
+        this.m_action_runners.set("CloneAndMoveTo",new CloneAndMoveToRunner())
     }
     public static getInstance(): ActionManager {
         if (!ActionManager.instance) {
@@ -31,5 +32,12 @@ export class ActionManager{
         }
 
         return {} as ActionResult;
+    }
+    public runBatch(configs:ActionConfig[]):ActionResult[]{
+        let results:ActionResult[] = []
+        for(let config of configs){
+            results.push(this.run(config));
+        }
+        return results;
     }
 }

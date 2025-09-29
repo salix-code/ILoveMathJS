@@ -36,6 +36,9 @@ export class Expression extends Container{
         }
         return this.getChildAt(index);
     }
+    public get_label_position(index:number):Point{
+        return this.get_label(index).getGlobalPosition()
+    }
     public remove_label(index:number){
         if(index < 0){
             index = this.m_labels.length + index;
