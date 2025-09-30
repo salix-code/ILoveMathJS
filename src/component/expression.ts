@@ -1,5 +1,10 @@
 import { Container, Graphics, Text,Point } from 'pixi.js';
 
+export type ExpressionConfig = {
+    expression : string;
+    x : number;
+    y : number;
+}
 export class Expression extends Container{
     private m_expression:string[] = [];
     private m_labels :Text[] = [];

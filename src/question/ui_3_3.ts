@@ -1,7 +1,7 @@
 import { Container, Graphics, Text,Point } from 'pixi.js';
 import { Line } from '../component/line';
 
-import { type AnimationItem,type AnimationData ,AnimationSystem} from "../component/anim";
+import { type AnimationItem,type AnimationData ,AnimationSystem} from "../class/anim";
 import { Arrow } from '../component/arrow';
 import { Helper } from '../class/Help';
 

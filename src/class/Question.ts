@@ -1,12 +1,13 @@
 import { Container, Graphics, Text,Point } from 'pixi.js';
+import { Pipeline } from '../actions/pipeline';
 
-import { SystemManager, type IComponent, type ISystem} from '../system/system';
+
 
 export class QuestionView extends Container{
     protected answer_index : number = 0;
     protected draw_answer_function:((is_clear:boolean) => void)[] = [];
     private title_label:Text;
-    private m_systemManager : SystemManager = new SystemManager();
+    protected m_pipeline : Pipeline = new Pipeline();
     constructor(title:string){
         super()
         this.title_label = new Text()
@@ -17,12 +18,7 @@ export class QuestionView extends Container{
         this.title_label.label = "title";
         this.addChild(this.title_label)
     }
-    public add_system(system:ISystem){
-        this.m_systemManager.add_system(system);
-    }
-    public add_component<T extends IComponent>(component:T):number{
-        return this.m_systemManager.add_component(component)
-    }
+    
     public clean(){
         this.answer_index = 0;
         const childrenToRemove = this.children.filter(child => child.label == "title");
@@ -52,9 +48,7 @@ export class QuestionView extends Container{
 
     }
 
-    public tick(delta:number){
-        this.m_systemManager.update(delta);
-    }
+    
 };
 
 type QuestionTemplate = {

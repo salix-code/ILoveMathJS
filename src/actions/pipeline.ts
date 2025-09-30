@@ -1,37 +1,106 @@
 import { Container,Text} from 'pixi.js';
-import { AnimationSystem } from '../component/anim';
+import { AnimationSystem } from '../class/anim';
+import { Expression } from '../component/expression';
 
 export interface PipelineContext{
     view:Map<string,Container>;
 }
 
+
 export class Pipeline{
     private context:PipelineContext;
-    private animation_system:AnimationSystem ;
-    constructor(context:PipelineContext){
-        this.context = context;
+
+    private m_slots:string[] = [];
+    constructor(){
+        this.context = {} as PipelineContext;
         this.context.view = new Map();
-        this.animation_system = AnimationSystem.getInstance()
     }
-    public clone(input:Container,tag:string):Pipeline{
+    public clone(input:Container):Pipeline{
         if(input instanceof Text){
-            return this.clone_text(input as Text,tag);
+            return this.clone_text(input as Text);
         }
         return this;
     }
-    public add_child(stage:Container,tag:string){
-        stage.addChild();
+    public create<T extends new (...args: any[]) => Container>(ctor:T,...args: ConstructorParameters<T>){
+        const output = new ctor(...args);
+        
+        this.save_view(output);
         return this;
     }
-    public move_to():Pipeline{
-        this.animation_system.move_to(this.context.anim_view,)
+
+    public use(input:Container){
+        if(this.m_slots.length > 0){
+            const tag = this.m_slots[this.m_slots.length - 1]!;
+            this.context.view.set(tag,input);
+        }
+    }
+
+    public create_expression(expression:string,x:number,y:number){
+        const label = new Expression(expression);
+        label.x = x;
+        label.y = y;
         return this;
     }
-    private clone_text(input:Text,tag:string):Pipeline{
+    protected get_view():Container{
+        const tag = this.m_slots[this.m_slots.length - 1]!;
+        return this.context.view.get(tag);
+    }
+
+    protected save_view(view:Container){
+        if(this.m_slots.length > 0){
+            const tag = this.m_slots[this.m_slots.length - 1]!;
+            this.context.view.set(tag,view);
+        }
+    }
+    
+
+    public set_position(x:number,y:number){
+        const view = this.get_view();
+        if(view){
+            view.x = x;
+            view.y = y;
+        }
+        return this;
+    }
+
+    public push_slot(tag:string){
+        this.m_slots.push(tag);
+        return this;
+    }
+    public pop_slot(){
+        this.m_slots.pop();
+        return this;
+    }
+
+    public attach_to(stage:Container){
+        if(this.m_slots.length > 0){
+            const tag = this.m_slots[this.m_slots.length - 1]!;
+            const view = this.context.view.get(tag)!;
+            if(view){
+                stage.addChild(view);
+            }
+        }
+        return this;
+    }
+    public move_to(x:number,y:number):Pipeline{
+        if(this.m_slots.length > 0){
+            const tag = this.m_slots[this.m_slots.length - 1]!;
+            const view = this.context.view.get(tag)!;
+            if(view){
+                AnimationSystem.getInstance().move_to(view,x,y,2);
+            }
+        }
+        
+        return this;
+    }
+    private clone_text(input:Text):Pipeline{
         const view = new Text();
         view.style = input.style;
         view.text = input.text;
-        this.context.view.set(tag,view);
+        if(this.m_slots.length > 0){
+            const tag = this.m_slots[this.m_slots.length - 1]!;
+            this.context.view.set(tag,view);
+        }
         //this.context.anim_view.
         return this;
     }

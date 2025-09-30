@@ -1,7 +1,7 @@
 import { Application, Graphics,Text } from 'pixi.js';
 
-import { Math_3_3 } from './ui/ui_3_3';
-import { AnimationSystem } from './component/anim';
+import { Math_3_3 } from './question/ui_3_3';
+import { AnimationSystem } from './class/anim';
 
 
 const app = new Application();
