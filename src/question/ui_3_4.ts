@@ -1,18 +1,13 @@
-import { Container, Graphics, Text,Point } from 'pixi.js';
+import { Container, Graphics, Text,Point, type TextOptions, TextStyle } from 'pixi.js';
 
-import {Expression, type ExpressionConfig} from "../component/expression.js"
-import { AnimationSystem } from '../class/anim.js';
-import { Arrow } from '../component/arrow.js';
-import { QuestionController, QuestionView } from '../class/Question.js';
-
-
-import { Pipeline} from '../actions/pipeline.js';
+import {Expression, type ExpressionConfig} from "../component/expression"
+import { AnimationSystem } from '../class/anim';
+import { Arrow } from '../component/arrow';
+import { QuestionController, QuestionView } from '../class/Question';
 
 
-type ExpressionData = {
-    expression :Expression,
-    index : number
-}
+import { Pipeline} from '../actions/pipeline';
+
 
 class Question_1 extends QuestionView{
     
@@ -21,10 +16,6 @@ class Question_1 extends QuestionView{
     private divisor:number = 8;
 
     private divisor_index:number[] = [];
-
-    private m_expression : ExpressionData[] = [];
-
-    protected animation_system : AnimationSystem = new AnimationSystem();
 
     constructor(title:string) {
         super(title)
@@ -37,17 +28,6 @@ class Question_1 extends QuestionView{
         ];
         this.regenerate();
     }
-
-    private create_expression(config:ExpressionConfig){
-        const expression = new Expression(config.expression);
-        expression.x = config.x;
-        expression.y = config.y;
-        this.addChild(expression);
-        this.m_expression.push({
-            expression:expression,
-            index:0
-        } as ExpressionData);
-    }
     
     public regenerate(){
         this.clean();
@@ -57,79 +37,90 @@ class Question_1 extends QuestionView{
         this.second_dividend = result * this.divisor - this.first_dividend;
         const expression = this.first_dividend + " / " + this.divisor +  " + " + this.second_dividend + " / " + this.divisor + " = ?"
         
-        this.create_expression({
-            expression : expression,
-            x : 100,
-            y : 50,
-        } as ExpressionConfig)
+        this.m_pipeline.push_slot("init").create_expression(expression,100,50).attach_to(this).pop_slot();
+
     }
     private answer_0(){
-        if(is_clear){
+        let view = this.m_pipeline.get_view_by_tag("init");
+        if(view){
+            const expression = view as Expression;
+            expression.change_label_color(2,'yellow');
+            expression.change_label_color(6,'yellow');
 
+            this.m_pipeline.push_slot('tip').create(Text,{"style" : { fill: 'white', fontSize: 18 }} as TextOptions).attach_to(this).set_position(100,100).pop_slot();
+            const tip = this.m_pipeline.get_view_by_tag("tip");
+            if(tip){
+                (tip as Text).text = "找到他们相同的公共数字";
+            }
+           // tip.text = " "
         }
-        else{
-            const data_item:ExpressionData = this.m_expression[0]!;
-            data_item.expression.change_label_color(2,'yellow');
-            data_item.expression.change_label_color(2,'yellow');
-        }
+        
     }
     private answer_1(){
-        this.create_expression({
-                expression:"( _ + _ ) / _"
-            } as ExpressionConfig);
+
+        this.m_pipeline.push_slot("answer.1").create_expression("( _ + _ ) / (相同的数字)",100,140).attach_to(this).pop_slot();
     }
+
     private answer_2(){
-        if(is_clear){
 
-        }
-        else{
-            let data_item:ExpressionData = this.m_expression[0]!;
-            let label = data_item.expression.get_label(2);
-            data_item = this.m_expression[1]!;
-            label = data_item.expression.get_label(6)!
-            const point = label.getGlobalPosition()
-            const action_manager = ActionManager.getInstance();
+        let view1 = this.m_pipeline.get_view_by_tag("init") as Expression;
+        const label1 = view1.get_label(2)!;
+        const point1 = label1.getGlobalPosition()
+        const label2 = view1.get_label(6)!;
+        const point2 = label2.getGlobalPosition();
 
-            
-            action_manager.run({
-                stage : this,
-                label:label,
-                animation_system:this.animation_system,
-                target_x:10,
-                target_y:20,
-            } as CloneAndMoveToConfig);
-        }
+        const view3 = this.m_pipeline.get_view_by_tag("answer.1") as Expression;
+
+        let expression = view3 as Expression;
+        let label3 = expression.get_label(6)!;
+        label3.text = this.divisor + ""
+        const point3 = label3.getGlobalPosition();
+        
+        point3.y -= 30;
+
+        this.m_pipeline.push_slot("answer.2.arrow.1").create(Arrow,point1.x + 5,point1.y,point3.x + 10,point3.y).attach_to(this).pop_slot();
+        this.m_pipeline.push_slot("answer.2.arrow.2").create(Arrow,point2.x + 5,point2.y,point3.x + 15,point3.y).attach_to(this).pop_slot();
+    }
+    private hide_arrow(tag:string){
+        const arrow = this.m_pipeline.get_view_by_tag(tag)!;
+        this.removeChild(arrow);
     }
     private answer_3(){
-        const action_manager = ActionManager.getInstance();
+        this.hide_arrow("answer.2.arrow.1");
+        this.hide_arrow("answer.2.arrow.2");
 
-        const indexes =[0,1,4,3];
-        for(let i = 0; i < 2; ++i){
-            let data_item:ExpressionData = this.m_expression[0]!;
-            let label = data_item.expression.get_label(i);
-            data_item = this.m_expression[i]!;
-            const target_label = data_item.expression.get_label(i + 1)!
-            const target_point = target_label.getGlobalPosition();
-            action_manager.run({
-                stage : this,
-                label:label,
-                animation_system:this.animation_system,
-                target_x:target_point.x,
-                target_y:target_point.y,
-            } as CloneAndMoveToConfig);
-        }
+
+        this.m_pipeline.push_slot('tip').create(Text,{"style" : { fill: 'white', fontSize: 18 }} as TextOptions).attach_to(this).set_position(100,200).pop_slot();
+            const tip = this.m_pipeline.get_view_by_tag("tip");
+            if(tip){
+                (tip as Text).text = "把被除数放在括号里面";
+            }
+        
+        const expression = "( " + " ___ " + " + " + " ___ " + " )" + " / " + this.divisor;
+        this.m_pipeline.push_slot("answer.3").create_expression(expression,100,240).attach_to(this).pop_slot();
+        
+        //
+        const init_expression = this.m_pipeline.get_view_by_tag("init") as Expression;
+        const first = init_expression.get_label(0)!;
+        const target_expression = this.m_pipeline.get_view_by_tag("answer.3") as Expression;
+        const first_target_point = target_expression.get_label(1)!.getGlobalPosition();
+        this.m_pipeline.push_slot("answer.3.anim.2").clone(first,this).move_to_view(target_expression.get_label(1)!).pop_slot();
+
+        const second = init_expression.get_label(4)!;
+        const second_target_point = target_expression.get_label(3)!.getGlobalPosition();
+        const cb = this.on_answer_3_cb.bind(this);
+        this.m_pipeline.push_slot("answer.3.anim.2").clone(second,this).move_to_view(target_expression.get_label(3)!,cb).pop_slot();
+        
+    }
+    private on_answer_3_cb(){
+        const expression = this.m_pipeline.get_view_by_tag("answer.3") as Expression;
+        expression.remove_label(1);
+        expression.remove_label(3);
     }
     private answer_4(){
-        if(is_clear){
-        
-        }else{
-            const result = (this.first_dividend + this.second_dividend) / this.divisor;
-            const expression = new Expression("(" + this.first_dividend + " + " + this.second_dividend + ") / " + this.divisor + " = " + result);
-            this.created_expressions.push(expression);
-            expression.x = 300;
-            expression.y = 230;
-            this.addChild(expression);
-        }
+        const result = (this.first_dividend + this.second_dividend) / this.divisor;
+        const expression = "(" + this.first_dividend + " + " + this.second_dividend + ") / " + this.divisor + " = " + result;
+        this.m_pipeline.create_expression(expression,300,230);
     }
     
 }
@@ -137,9 +128,6 @@ class Question_1 extends QuestionView{
 class Question_2 extends QuestionView{
     private m_dividends:number[] = []
     private m_divisor : number = 0;
-
-
-
     private m_showDivisionLabelIndex :number = 0;
 
     private m_resultValue:number = 0;
@@ -147,6 +135,7 @@ class Question_2 extends QuestionView{
     constructor(title:string){
         super(title);
         this.draw_answer_function = [
+            this.answer_0.bind(this),
             this.answer_show_division_label.bind(this),
             this.answer_show_division_label.bind(this),
             this.answer_2.bind(this),
@@ -183,43 +172,48 @@ class Question_2 extends QuestionView{
         if(this.m_dividends.length > 0){
             expression = expression.slice(0,-3);
         }
-        expression += " / " + this.m_divisor;
+        expression += " ) / " + this.m_divisor;
 
         this.create_expression(expression);
         
     }
 
     private create_expression(expression:string){
-        this.m_pipeline.push_slot("expression").create_expression(expression,100,50).pop_slot();
+        this.m_pipeline.push_slot("expression").create_expression(expression,100,50).attach_to(this).pop_slot();
+    }
+    private answer_0(){
+        this.m_pipeline.push_slot("tips.0").create(Text,{"style" : { fill: 'white', fontSize: 18 }} as TextOptions)
+            .attach_to(this)
+            .set_position(100,80)
+            .pop_slot();
+        const tip = this.m_pipeline.get_view_by_tag("tips.0") as Text;
+        if(tip){
+            tip.text = "检查每一项之和与除数关系是不是更简单"
+        }
     }
     private create_division_label(){
-        const expression = this.m_dividends[this.m_showDivisionLabelIndex]! +" / " + this.m_divisor;
-        this.m_pipeline.push_slot("division.label." + this.m_showDivisionLabelIndex).create_expression(expression,200,50 + this.m_showDivisionLabelIndex * 50).pop_slot();
+        const m = this.m_dividends[this.m_showDivisionLabelIndex]!;
+        const n = this.m_divisor;
+        const expression = m +" / " + n + " = " + Math.floor( m / n);
+        this.m_pipeline.push_slot("division.label." + this.m_showDivisionLabelIndex)
+            .create_expression(expression,300 + this.m_dividends.length * 50,60 + this.m_showDivisionLabelIndex * 20)
+            .attach_to(this)
+            .pop_slot();
+            
         this.m_showDivisionLabelIndex += 1;
     }
 
     private answer_show_division_label(){
-        if(this.m_showDivisionLabelIndex < this.m_dividends.length){
-
-            if(this.m_showDivisionLabelIndex == 0){
-                this.create_division_label();
-            }
-            else{
-                while(this.m_showDivisionLabelIndex < this.m_dividends.length){
-                    this.create_division_label();
-                }
-            }
+        if(this.m_showDivisionLabelIndex == 0){
+            this.create_division_label();
         }
         else{
-
+            while(this.m_showDivisionLabelIndex < this.m_dividends.length){
+                this.create_division_label();
+            }
         }
-        
     }
-    private answer_1(){
-        const expression = "_ / _"
-        this.m_pipeline.push_slot("answer_1.1").create_expression(expression,200,50).attach_to(this).pop_slot();
-        this.m_pipeline.push_slot("answer_1.2").create_expression(expression,200,50).attach_to(this).pop_slot();
-    }
+    
 
     private answer_2(){
         let expression = "";
@@ -229,20 +223,29 @@ class Question_2 extends QuestionView{
         if(this.m_dividends.length > 0){
             expression = expression.slice(0,-3);
         }
-        this.m_pipeline.push_slot("answer_2").create_expression(expression,200,50).attach_to(this).pop_slot();
+        const height = 130 + this.m_dividends.length * 20
+        this.m_pipeline.push_slot("answer.2")
+            .create_expression(expression,100,height)
+            .attach_to(this)
+            .pop_slot();
+        
+        
     }
     private answer_3(){
-        let expression = "";
-        for(let d of this.m_dividends){
-            expression += Math.floor(d / this.m_divisor) + " + ";
+        const expression = this.m_pipeline.get_view_by_tag("expression") as Expression;
+        const answer = this.m_pipeline.get_view_by_tag("answer.2") as Expression;
+        for(let i = 0; i < this.m_dividends.length; ++i){
+            const label = expression.get_label(1 + i * 2);
+            const target = answer.get_label(i * 4);
+            if(label && target){
+                this.m_pipeline.push_slot("answer.3.arrow." + i)
+                    .make_arrow(label,target,this)
+                    .pop_slot();
+            }
         }
-        if(this.m_dividends.length > 0){
-            expression = expression.slice(0,-3);
-        }
-        this.m_pipeline.push_slot("answer_2").create_expression(expression,200,50).attach_to(this).pop_slot();
     }
     private answer_4(){
-        let expression = this.m_resultValue;
+        let expression:string = this.m_resultValue + "";
         
         this.m_pipeline.push_slot("answer_2").create_expression(expression,200,50).attach_to(this).pop_slot();
     }
@@ -255,7 +258,7 @@ export class Math_3_4 extends QuestionController {
 
         this.question_templates.push({
             template:Question_1,
-            title:"除法取公共因子"
+            title:"除法提取公共因子"
         },{
             template:Question_2,
             title:"除法拆式"

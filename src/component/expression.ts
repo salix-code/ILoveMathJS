@@ -5,9 +5,15 @@ export type ExpressionConfig = {
     x : number;
     y : number;
 }
+
+interface TextItem{
+    label:Text|null,
+    index : number,
+}
+
 export class Expression extends Container{
     private m_expression:string[] = [];
-    private m_labels :Text[] = [];
+    private m_labels :TextItem[] = [];
     constructor(expression:string){
         super()
         this.m_expression = expression.trim().split(/\s+/);
@@ -23,40 +29,62 @@ export class Expression extends Container{
             label.text = text;
             label.x = offset;
             label.y = 0;
-            this.m_labels.push(label);
+            this.m_labels.push({
+                label:label,
+                index : this.m_labels.length,
+            });
             offset = offset + label.width + 10;
         }
     }
     private redraw():void{
-        //this.clear();
+        this.clear();
     
-        for(let label of this.m_labels){
-            this.addChild(label)
+        for(let item of this.m_labels){
+            if(item.label){
+                this.addChild(item.label)
+            }
         }
         
     }
-    public get_label(index:number):Text{
+    private clear(){
+        for(let item of this.m_labels){
+            if(item.label){
+                this.removeChild(item.label)
+            }
+        }
+    }
+    public get_label(index:number):Text | null{
         if(index < 0){
             index = this.m_labels.length + index;
         }
-        return this.getChildAt(index);
+        
+        return this.m_labels[index]!.label!
+        
     }
-    public get_label_position(index:number):Point{
-        return this.get_label(index).getGlobalPosition()
-    }
+    
     public remove_label(index:number){
         if(index < 0){
             index = this.m_labels.length + index;
         }
-        let label = this.get_label(index)!;
-        this.m_labels.splice(index,1);
-        this.removeChild(label);
-        this.redraw();
+        let item = this.m_labels[index]!;
+        if(item.label){
+            this.removeChild(item.label!);
+            item.label = null;
+            this.redraw();
+        }
+        //this.m_labels.splice(index,1);
+        
     }
 
     public change_label_color(index:number,color:string){
-        let label = this.get_label(index)!;
-        label.style.fill = color;
+        if(index >= 0 && index < this.m_labels.length){
+            let item = this.m_labels[index];
+            if(item && item.label){
+                item.label.style.fill = color;
+            }
+        }
+        
+        
     }
     
 }

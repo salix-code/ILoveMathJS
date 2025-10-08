@@ -53,7 +53,7 @@ class RectangleView extends PIXI.Graphics{
 
     private redraw(){
         this.clear();
-        this.lineStyle(width, color);
+        //this.lineStyle(width, color);
 
         const left = 0;
         const top = 0;

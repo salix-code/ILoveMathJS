@@ -1,6 +1,6 @@
 import { Application, Graphics,Text } from 'pixi.js';
 
-import { Math_3_3 } from './question/ui_3_3';
+import { Math_3_4 } from './question/ui_3_4';
 import { AnimationSystem } from './class/anim';
 
 
@@ -10,7 +10,7 @@ app.renderer.resize(800, 600);
 document.body.appendChild(app.view);
 
 
-const shape_3_2 = new Math_3_3(0,0);
+const shape_3_2 = new Math_3_4(0,0);
 
 shape_3_2.x = 0;
 shape_3_2.y = 0; 
@@ -18,7 +18,7 @@ shape_3_2.y = 0;
 const animation_system = AnimationSystem.getInstance();
 
 app.ticker.add(() => {
-    animation_system.tick(app.ticker.deltaTime);
+    animation_system.tick(app.ticker.deltaTime / 10.0);
     shape_3_2.tick(app.ticker.deltaTime / 10.0);
 });
 

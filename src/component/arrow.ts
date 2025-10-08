@@ -46,8 +46,8 @@ export class Arrow extends PIXI.Graphics {
 
         const {
             color = 0xFFFFFF,
-            width = 4,
-            headLength = 16,
+            width = 2,
+            headLength = 8,
             headAngle = Math.PI / 7
         } = this.options;
 

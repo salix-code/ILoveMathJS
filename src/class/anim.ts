@@ -8,6 +8,7 @@ export type AnimationItem = {
     view : Container;
     target : Position,
     seconds : number;
+    cb : (()=>void) | undefined;
 }
 export type AnimationData = {
     speed_x : number,
@@ -51,6 +52,11 @@ export class AnimationSystem {
                 if(data.duration <= 0){
                     item.view.x = item.target.x;
                     item.view.y = item.target.y;
+
+                    if(item.cb){
+                        item.cb();
+                    }
+                    data.duration = -1;
                 }
             }
         }
@@ -61,7 +67,7 @@ export class AnimationSystem {
 
     }
 
-    public move_to(view:Container,x:number,y:number,seconds:number):void{
+    public move_to(view:Container,x:number,y:number,seconds:number,cb? : ()=>void):void{
         const item : AnimationItem = {
             view :view,
             target : {
@@ -69,6 +75,7 @@ export class AnimationSystem {
                 y : y
             },
             seconds:seconds,
+            cb : cb,
         }
         
         let data:AnimationData = {

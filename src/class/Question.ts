@@ -1,4 +1,4 @@
-import { Container, Graphics, Text,Point } from 'pixi.js';
+import { Container, Graphics, Text,Point, NineSliceSpriteGpuData } from 'pixi.js';
 import { Pipeline } from '../actions/pipeline';
 
 
@@ -6,22 +6,15 @@ import { Pipeline } from '../actions/pipeline';
 export class QuestionView extends Container{
     protected answer_index : number = 0;
     protected draw_answer_function:((is_clear:boolean) => void)[] = [];
-    private title_label:Text;
     protected m_pipeline : Pipeline = new Pipeline();
     constructor(title:string){
         super()
-        this.title_label = new Text()
-        this.title_label.style = { fill: 'white', fontSize: 24 };
-        this.title_label.text = title
-        this.title_label.x = 300;
-        this.title_label.y = 20;
-        this.title_label.label = "title";
-        this.addChild(this.title_label)
+        
     }
     
     public clean(){
         this.answer_index = 0;
-        const childrenToRemove = this.children.filter(child => child.label == "title");
+        const childrenToRemove = this.children.filter(child => child.label != "title");
         for (const child of childrenToRemove) {
             this.removeChild(child);
         }
@@ -58,16 +51,26 @@ type QuestionTemplate = {
 
 export class QuestionController extends Container {
     private question!:QuestionView;
-    private question_index: number = 0;
+    private question_index: number = -1;
 
     protected question_templates : QuestionTemplate[] = [];
+    private title_label!:Text ;
 
     constructor() {
         super();
         window.addEventListener('keydown', this.onKeyDown);
     }
+    private create_title(title:string){
+        this.title_label = new Text()
+        this.title_label.style = { fill: 'white', fontSize: 24 };
+        this.title_label.text = title
+        this.title_label.x = 300;
+        this.title_label.y = 10;
+        this.title_label.label = "title";
+        this.addChild(this.title_label)
+    }
     private step_question(direction : number){
-        const next_question = this.question_index + direction - 1;
+        const next_question = this.question_index + direction;
         if(next_question < 0){
             return;
         }
@@ -78,8 +81,8 @@ export class QuestionController extends Container {
         if(this.question != null){   
             this.removeChild(this.question);
         }
-        this.create_question();
         this.question_index = next_question;
+        this.create_question();
     }
     private step_answer(direction:number){
         if(this.question != null){
@@ -88,13 +91,21 @@ export class QuestionController extends Container {
     }
     public tick(delta: number):void{
         if(this.question){
-            this.question.tick(delta);
+            //this.question.tick(delta);
         }
     }
 
     private create_question(){
-        const question_template = this.question_templates[this.question_index - 1]!;
+        const question_template = this.question_templates[this.question_index]!;
+        if(this.title_label == null){
+            this.create_title(question_template.title);
+        }else{
+            this.title_label.text = question_template.title;
+        }
+        
         this.question = new question_template.template(question_template.title);
+        this.question.x = 0;
+        this.question.y = 30;
         this.addChild(this.question);
     }
     private regenerated(){
@@ -109,10 +120,9 @@ export class QuestionController extends Container {
         } else if (e.key === 'ArrowLeft') {
             this.step_answer(-1);
         } else if (e.key === 'ArrowUp') {
-            this.step_question(1)
+            this.step_question(-1)
         } else if (e.key === 'ArrowDown') {
-            this.question_index += 1;
-            this.step_question(-1);
+            this.step_question(1);
         }
         else if (e.key === '`'){
             this.regenerated();
