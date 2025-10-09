@@ -1,5 +1,6 @@
 import { Container, Graphics, Text } from 'pixi.js';
 import { Arrow } from '../component/arrow';
+import type { QuestionTableItem } from '../class/table_item';
 
 interface Question {
     step(d:number):void;
@@ -229,3 +230,9 @@ export class Math_3_2 extends Container {
         this.run();
     };
 }
+
+export const APP_Math_3_2 : QuestionTableItem = {
+    category: "3-2",
+    creator: ()=> new Math_3_2(0,0)
+}
+
