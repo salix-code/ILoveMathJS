@@ -34,6 +34,12 @@ export class Arrow extends PIXI.Graphics {
         this.redraw();
     }
 
+    public setPoints(x1: number, y1: number, x2: number, y2: number) {
+        this.start.set(x1, y1);
+        this.end.set(x2, y2);
+        this.redraw();
+    }
+
     // 动态设置参数
     public setOptions(options: ArrowOptions) {
         Object.assign(this.options, options);

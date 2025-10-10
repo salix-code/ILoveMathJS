@@ -7,6 +7,7 @@ import { QuestionController, QuestionView } from '../class/Question';
 
 
 import { Pipeline} from '../actions/pipeline';
+import type { QuestionTableItem } from '../class/table_item';
 
 
 class Question_1 extends QuestionView{
@@ -263,7 +264,11 @@ export class Math_3_4 extends QuestionController {
             template:Question_2,
             title:"除法拆式"
         })
-        
     }
-    
+}
+
+export const APP_Math_3_4 : QuestionTableItem = {
+    category: "奥数",
+    title: "除法小技巧",
+    creator: ()=> new Math_3_4(0,0)
 }

@@ -232,7 +232,8 @@ export class Math_3_2 extends Container {
 }
 
 export const APP_Math_3_2 : QuestionTableItem = {
-    category: "3-2",
+    category: "奥数",
+    title: "字母放方框",
     creator: ()=> new Math_3_2(0,0)
 }
 
