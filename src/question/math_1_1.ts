@@ -7,7 +7,7 @@ class Question_1 extends QuestionView {
         this.regenerate();
     }
 
-    private regenerate(){
+    public regenerate(){
         
     }
 }

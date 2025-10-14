@@ -32,11 +32,13 @@ class Question_1 extends QuestionView{
     
     public regenerate(){
         this.clean();
-        this.divisor = Math.floor(Math.random() * 97) + 3;
+
+        this.divisor = Math.floor(Math.random() * 10) + 3;
         const result = Math.floor(Math.random() * 5) + 5;
         this.first_dividend = Math.floor(Math.random() * this.divisor * result / 2);
-        this.second_dividend = result * this.divisor - this.first_dividend;
-        const expression = this.first_dividend + " / " + this.divisor +  " + " + this.second_dividend + " / " + this.divisor + " = ?"
+        const flag = Math.random() > 0.5;
+        this.second_dividend = result * this.divisor - this.first_dividend * ( flag ? 1 : -1);
+        const expression = this.first_dividend + " / " + this.divisor + flag?" + ":" - " + this.second_dividend + " / " + this.divisor + " = ?"
         
         this.m_pipeline.push_slot("init").create_expression(expression,100,50).attach_to(this).pop_slot();
 
@@ -256,19 +258,19 @@ export class Math_3_4 extends QuestionController {
     
     constructor(x : number,y:number) {
         super();
-
         this.question_templates.push({
             template:Question_1,
-            title:"除法提取公共因子"
+            title:"除法提取公共因子(除数)"
         },{
             template:Question_2,
             title:"除法拆式"
         })
+        
     }
 }
 
 export const APP_Math_3_4 : QuestionTableItem = {
     category: "奥数",
-    title: "除法小技巧",
+    title: "巧算除法",
     creator: ()=> new Math_3_4(0,0)
 }

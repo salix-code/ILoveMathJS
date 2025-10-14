@@ -60,6 +60,13 @@ export class QuestionController extends Container {
         super();
         window.addEventListener('keydown', this.onKeyDown);
     }
+    public start(){
+        if(this.question_templates.length > 0){
+            this.question_index = 0;
+            this.create_question();
+        }
+    }
+
     private create_title(title:string){
         this.title_label = new Text()
         this.title_label.style = { fill: 'white', fontSize: 24 };

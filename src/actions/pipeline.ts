@@ -2,6 +2,7 @@ import { Container,Text} from 'pixi.js';
 import { AnimationSystem } from '../class/anim';
 import { Expression } from '../component/expression';
 import { Arrow } from '../component/arrow';
+import { Line } from '../component/line';
 
 export interface PipelineContext{
     view:Map<string,Container>;
@@ -12,7 +13,8 @@ export class Pipeline{
     private context:PipelineContext;
 
     private m_slots:string[] = [];
-    
+    private current :Container | null = null;
+
     constructor(){
         this.context = {} as PipelineContext;
         this.context.view = new Map();
@@ -34,6 +36,7 @@ export class Pipeline{
         const output = new ctor(...args);
         
         this.save_view(output);
+        
         return this;
     }
 
@@ -52,9 +55,14 @@ export class Pipeline{
         this.save_view(label);
         return this;
     }
-    protected get_view():Container{
-        const tag = this.m_slots[this.m_slots.length - 1]!;
-        return this.context.view.get(tag)!;
+    protected get_view():Container | null{
+        if (this.m_slots.length > 0){
+            const tag = this.m_slots[this.m_slots.length - 1]!;
+
+            return this.context.view.get(tag)!;
+        }
+        return this.current;
+        
     }
     public get_view_by_tag(tag:string):Container|undefined{
         return this.context.view.get(tag);
@@ -65,6 +73,7 @@ export class Pipeline{
             const tag = this.m_slots[this.m_slots.length - 1]!;
             this.context.view.set(tag,view);
         }
+        this.current = view;
     }
     
 
@@ -86,73 +95,104 @@ export class Pipeline{
 
         return this;
     }
-
-    public attach_to(stage:Container){
-        if(this.m_slots.length > 0){
-            const tag = this.m_slots[this.m_slots.length - 1]!;
-            const view = this.context.view.get(tag)!;
-            if(view){
-                stage.addChild(view);
-            }
+    public tag(input:string){
+        if (this.current){
+            this.context.view.set(input,this.current!);
+            this.current = null;
         }
+
+    }
+
+    public attach_to(stage:Container|null){
+        const view = this.get_view();
+        
+        if(view && stage){
+            stage.addChild(view);
+        }
+        
         return this;
     }
     public move_to(x:number,y:number):Pipeline{
-        if(this.m_slots.length > 0){
-            const tag = this.m_slots[this.m_slots.length - 1]!;
-            const view = this.context.view.get(tag)!;
-            if(view){
-                AnimationSystem.getInstance().move_to(view,x,y,2);
-            }
+        const view = this.get_view();
+
+         if(view){
+            AnimationSystem.getInstance().move_to(view,x,y,2);
         }
         
         return this;
     }
     public move_to_view(target:Container,cb?:()=>void){
-        if(this.m_slots.length > 0){
-            const tag = this.m_slots[this.m_slots.length - 1]!;
-            const anim_view = this.context.view.get(tag)!;
-            if(anim_view){
-                if(anim_view.parent == target.parent){
-                    let point = target.position
-                    AnimationSystem.getInstance().move_to(anim_view,point.x,point.y,2);
-                }
-                else if(anim_view.parent){
-                    
-                    let point = target.getGlobalPosition();
-                    point = anim_view.parent.toLocal(point);
-                    AnimationSystem.getInstance().move_to(anim_view,point.x,point.y,2,cb);
-                }
+        const anim_view = this.get_view();
+        if(anim_view){
+            if(anim_view.parent == target.parent){
+                let point = target.position
+                AnimationSystem.getInstance().move_to(anim_view,point.x,point.y,2);
+            }
+            else if(anim_view.parent){
+                
+                let point = target.getGlobalPosition();
+                point = anim_view.parent.toLocal(point);
+                AnimationSystem.getInstance().move_to(anim_view,point.x,point.y,2,cb);
             }
         }
 
         return this;
     }
     public set_property(name:string,value:any){
-        let label = this.get_view();
+        let label = this.get_view()!;
         if(name in label){
            //label[name] = value;
         }
     }
 
-    public make_arrow(from:Container,target:Container,parent:Container){
-        let from_point = from.getGlobalPosition();
+    public make_text(text:string,font_size?:number,color? : string){
+        font_size = font_size || 24;
+        color = color || 'white'
+        const label = new Text({
+            text: text,
+            style: {fill:color, fontSize:font_size}});
+        this.save_view(label);
+        return this;
+    }
+    public make_vertical_line(x:number,y : number,length:number){
+        let line = new Line(x,y,x,y + length);
+        this.current = line
+        return this
+        
+    }
+
+    public make_arrow(from:Container|string,target:Container|string,parent:Container){
+        let from_label:Container;
+        let target_label:Container;
+        if (typeof from == "string"){
+            from_label = this.get_view_by_tag(from)!;
+        }
+        else{
+            from_label = from as Container;
+        }
+        if (typeof target == "string"){
+            target_label = this.get_view_by_tag(target)!;
+        }
+        else{
+            target_label = target as Container;
+        }
+        let from_point = from_label.getGlobalPosition();
         from_point = parent.toLocal(from_point);
-        let target_point = target.getGlobalPosition();
+        let target_point = target_label.getGlobalPosition();
         target_point = parent.toLocal(target_point);
         if(target_point.y > from_point.y){
-            from_point.y += from.height;
-            if(target_point.x > from_point.x + from.width){
-                from_point.x += from.width;
+            from_point.y += from_label.height;
+            if(target_point.x > from_point.x + from_label.width){
+                from_point.x += from_label.width;
             }
-            else if(target_point.x + target.width > from_point.x){
-                from_point.x += from.width / 2;
+            else if(target_point.x + target_label.width > from_point.x){
+                from_point.x += from_label.width / 2;
             }
             else{
                 
             }
 
-            target_point.x += target.width / 2;
+            target_point.x += target_label.width / 2;
         }
         const arrow = new Arrow(from_point.x,from_point.y,target_point.x,target_point.y);
         parent.addChild(arrow);

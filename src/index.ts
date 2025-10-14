@@ -7,7 +7,7 @@ import { Arrow } from './component/arrow';
 
 const app = new Application();
 await app.init();
-app.renderer.resize(1200, 800);
+app.renderer.resize(1200, 600);
 document.body.appendChild(app.view);
 
 let current_scene:number = 0;
@@ -28,7 +28,9 @@ app.stage.addChild(arrow);
 type TableOptions = {
     start_x? : number,
     start_y ?: number,
-    fonnt_size ?: number
+    fonnt_size ?: number,
+    height_span ? :number
+
 }
 
 function generate_table_items(options?:TableOptions){
@@ -38,10 +40,12 @@ function generate_table_items(options?:TableOptions){
     options.start_x = options.start_x || 200;
     options.start_y = options.start_y || 60;
     options.fonnt_size = options.fonnt_size || 48;
+    options.height_span = options.height_span || 20;
 
+    let height_offset = 0
     for(let i = 0; i < table_items.length; ++ i){
         const item = table_items[i]!;
-        const position:Point = {x: options.start_x, y:options.start_y + i * 40} as Point;
+        const position:Point = {x: options.start_x, y:options.start_y + height_offset} as Point;
 
         const text = new Text({
             text: (i + 1) + " " + item.name,
@@ -49,6 +53,7 @@ function generate_table_items(options?:TableOptions){
         text.position = position;
         item.position.x = position.x - 60;
         item.position.y = position.y + text.height / 2;
+        height_offset += text.height + options.height_span;
         scene.addChild(text);
     }
 }
@@ -125,6 +130,7 @@ function show_selected_question(){
     const item = APP_QuestionTable.items[index]!;
     const question_instance = item.creator();
     app.stage.addChild(question_instance);
+    question_instance.start();
 }
 
 

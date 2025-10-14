@@ -4,7 +4,6 @@ import { Line } from '../component/line';
 import { type AnimationItem,type AnimationData ,AnimationSystem} from "../class/anim";
 import { Arrow } from '../component/arrow';
 import { Helper } from '../class/Help';
-import type { QuestionTableItem } from '../class/table_item';
 
 function format(str: string, ...args: any[]) {
     return str.replace(/{(\d+)}/g, (match, index) => args[index]);
@@ -576,10 +575,4 @@ export class Math_3_3 extends Container {
             this.regenerated();
         }
     }
-}
-
-export const APP_Math_3_3 : QuestionTableItem = {
-    category: "奥数",
-    title: "乘法小技巧",
-    creator: ()=> new Math_3_3(0,0)
 }
