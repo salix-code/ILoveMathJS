@@ -349,8 +349,8 @@ class Multiply_11 extends Question{
         this.move_to(anim_label,offset_x,base_y,2);
         offset_x += 20;
 
-        let arrow = Helper.make_arrow(label,base_x,base_y);
-        this.addChild(arrow);
+        //let arrow = Helper.make_arrow(label,base_x,base_y);
+        //this.addChild(arrow);
 
         label = new Text();
         label.text = "="

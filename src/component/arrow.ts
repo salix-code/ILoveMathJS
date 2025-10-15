@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import type { Vector4 } from '../maths/vector';
 
 export interface ArrowOptions {
     color?: number;
@@ -7,59 +8,52 @@ export interface ArrowOptions {
     headAngle?: number;
 }
 
+// anchors
+export type ArrowInitializer = {
+    start_point : {
+        point : Vector4,
+        size : PIXI.ISize,
+    }
+    end_point : {
+        point : Vector4,
+        size : PIXI.ISize,
+    }
+    option?:ArrowOptions
+}
+
 export class Arrow extends PIXI.Graphics {
-    private start: PIXI.Point;
-    private end: PIXI.Point;
-    private options: ArrowOptions;
+    
+    private m_initializer! : ArrowInitializer;
 
-    constructor(
-        x1: number, y1: number, x2: number, y2: number,
-        options: ArrowOptions = {}
-    ) {
+    constructor(initializer : ArrowInitializer) {
         super();
-        this.start = new PIXI.Point(x1, y1);
-        this.end = new PIXI.Point(x2, y2);
-        this.options = options;
+        this.m_initializer = initializer;
         this.redraw();
     }
-
-    // 更新起点和终点
-    public setFrom(x: number, y: number) {
-        this.start.set(x, y);
-        this.redraw();
-    }
-
-    public setTo(x: number, y: number) {
-        this.end.set(x, y);
-        this.redraw();
-    }
-
-    public setPoints(x1: number, y1: number, x2: number, y2: number) {
-        this.start.set(x1, y1);
-        this.end.set(x2, y2);
-        this.redraw();
-    }
-
-    // 动态设置参数
-    public setOptions(options: ArrowOptions) {
-        Object.assign(this.options, options);
-        this.redraw();
-    }
-
+    
     // 重新绘制
     public redraw() {
         this.clear();
 
         const {
-            color = 0xFFFFFF,
-            width = 2,
-            headLength = 8,
-            headAngle = Math.PI / 7
-        } = this.options;
+            option = {
+                color : 0xFFFFFF,
+                width : 2,
+                headLength : 8,
+                headAngle : Math.PI / 7
+            }
+        } = this.m_initializer;
 
-        const x1 = this.start.x, y1 = this.start.y, x2 = this.end.x, y2 = this.end.y;
+        let coordination = this.m_initializer.start_point;
+        const x1 = coordination.point.x + coordination.point.z * coordination.size.width;
+        const y1 = coordination.point.y + coordination.point.w * coordination.size.height;
+
+        coordination = this.m_initializer.start_point;
+        const x2 = coordination.point.x + coordination.point.z * coordination.size.width;
+        const y2 = coordination.point.y + coordination.point.w * coordination.size.height;
+
         // 主线体
-        this.lineStyle(width, color);
+        this.lineStyle(option.width, option.color);
         this.moveTo(x1, y1);
         this.lineTo(x2, y2);
         

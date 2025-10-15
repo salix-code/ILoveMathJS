@@ -3,6 +3,8 @@ import {QuestionView,QuestionController} from "../class/Question"
 import { Expression } from '../component/expression';
 import type { QuestionTableItem } from '../class/table_item';
 import { Line } from '../component/line';
+import type { ArrowInitializer } from '../component/arrow';
+import { Vector4 } from '../maths/vector';
 
 
 class Question_1 extends QuestionView{
@@ -62,8 +64,15 @@ class Question_1 extends QuestionView{
         
         this.m_pipeline.push_slot("answer.3.tip.1").make_text("到这里是一样多").set_position(620,230).attach_to(this).pop_slot();
 
-
-        this.m_pipeline.push_slot("answer.3.arrow").make_arrow("answer.2.number.2","answer.3.tip.1",this).attach_to(this).pop_slot();
+        const arrow_initializer = {
+            start_point : {
+                point : new Vector4(0,0,0.5,0.5)
+            },
+            end_point : {
+                point : new Vector4(0,0,0.5,0.5)
+            }
+        } as ArrowInitializer;
+        this.m_pipeline.push_slot("answer.3.arrow").make_arrow("answer.2.number.2","answer.3.tip.1",this,arrow_initializer).attach_to(this).pop_slot();
 
 
     }

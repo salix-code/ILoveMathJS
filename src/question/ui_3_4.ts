@@ -241,9 +241,9 @@ class Question_2 extends QuestionView{
             const label = expression.get_label(1 + i * 2);
             const target = answer.get_label(i * 4);
             if(label && target){
-                this.m_pipeline.push_slot("answer.3.arrow." + i)
-                    .make_arrow(label,target,this)
-                    .pop_slot();
+                // this.m_pipeline.push_slot("answer.3.arrow." + i)
+                //     .make_arrow(label,target,this)
+                //     .pop_slot();
             }
         }
     }

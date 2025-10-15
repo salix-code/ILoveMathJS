@@ -1,8 +1,9 @@
 import { Container,Text} from 'pixi.js';
 import { AnimationSystem } from '../class/anim';
 import { Expression } from '../component/expression';
-import { Arrow } from '../component/arrow';
+import { Arrow, type ArrowInitializer } from '../component/arrow';
 import { Line } from '../component/line';
+import { HorizontalSegment, Segment, type HorizontalSegmentOptions, type SegmentPoint } from '../component/segment';
 
 export interface PipelineContext{
     view:Map<string,Container>;
@@ -154,6 +155,7 @@ export class Pipeline{
         this.save_view(label);
         return this;
     }
+    
     public make_vertical_line(x:number,y : number,length:number){
         let line = new Line(x,y,x,y + length);
         this.current = line
@@ -161,43 +163,93 @@ export class Pipeline{
         
     }
 
-    public make_arrow(from:Container|string,target:Container|string,parent:Container){
-        let from_label:Container;
-        let target_label:Container;
-        if (typeof from == "string"){
-            from_label = this.get_view_by_tag(from)!;
+    public make_horiaontal_segment(optios:HorizontalSegmentOptions){
+        if (!optios) {
+            return this;
         }
-        else{
-            from_label = from as Container;
-        }
-        if (typeof target == "string"){
-            target_label = this.get_view_by_tag(target)!;
-        }
-        else{
-            target_label = target as Container;
-        }
+        
+        const segment = new HorizontalSegment(optios);
+        this.current = segment;
+        return this;
+    }
+
+    // public make_arrow(from:Container|string,target:Container|string,parent:Container){
+    //     let from_label:Container;
+    //     let target_label:Container;
+    //     if (typeof from == "string"){
+    //         from_label = this.get_view_by_tag(from)!;
+    //     }
+    //     else{
+    //         from_label = from as Container;
+    //     }
+    //     if (typeof target == "string"){
+    //         target_label = this.get_view_by_tag(target)!;
+    //     }
+    //     else{
+    //         target_label = target as Container;
+    //     }
+    //     let from_point = from_label.getGlobalPosition();
+    //     from_point = parent.toLocal(from_point);
+    //     let target_point = target_label.getGlobalPosition();
+    //     target_point = parent.toLocal(target_point);
+    //     if(target_point.y > from_point.y){
+    //         from_point.y += from_label.height;
+    //         if(target_point.x > from_point.x + from_label.width){
+    //             from_point.x += from_label.width;
+    //         }
+    //         else if(target_point.x + target_label.width > from_point.x){
+    //             from_point.x += from_label.width / 2;
+    //         }
+    //         else{
+                
+    //         }
+    //         target_point.x += target_label.width / 2;
+    //     }
+    //     const arrow = new Arrow(from_point.x,from_point.y,target_point.x,target_point.y);
+    //     parent.addChild(arrow);
+    //     this.save_view(arrow);
+    //     return this;
+    // }
+
+    public make_arrow(from:string,target:string,parent:Container,initializer:ArrowInitializer){
+
+        let from_label:Container = this.get_view_by_tag(from)!;;
+        let target_label:Container = this.get_view_by_tag(target)!;
+
         let from_point = from_label.getGlobalPosition();
         from_point = parent.toLocal(from_point);
+
+        initializer.start_point.point.x = from_point.x;
+        initializer.start_point.point.y = from_point.y;
+        initializer.start_point.size = {width:from_label.width,height:from_label.height};
+        
         let target_point = target_label.getGlobalPosition();
         target_point = parent.toLocal(target_point);
-        if(target_point.y > from_point.y){
-            from_point.y += from_label.height;
-            if(target_point.x > from_point.x + from_label.width){
-                from_point.x += from_label.width;
-            }
-            else if(target_point.x + target_label.width > from_point.x){
-                from_point.x += from_label.width / 2;
-            }
-            else{
-                
-            }
 
-            target_point.x += target_label.width / 2;
-        }
-        const arrow = new Arrow(from_point.x,from_point.y,target_point.x,target_point.y);
-        parent.addChild(arrow);
-        this.save_view(arrow);
+        initializer.end_point.point.x = target_point.x;
+        initializer.end_point.point.y = target_point.y;
+        initializer.end_point.size = {width:from_label.width,height:from_label.height};
+        
+        this.create_arrow(initializer)
+        parent.addChild(this.current);
         return this;
+    }
+
+    public create_arrow(initializer:ArrowInitializer){
+        const arrow = new Arrow(initializer);
+        this.current = arrow;
+        return this;
+    }
+
+    public redraw(...tags:string[]){
+        for(let tag of tags){
+            const view = this.get_view_by_tag(tag);
+            if(view){
+                if (typeof view["redraw"] === "function") {
+                    view["redraw"]();
+                }
+            }
+        }
     }
 
     
