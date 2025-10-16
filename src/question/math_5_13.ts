@@ -1,7 +1,7 @@
 import { Container,Text } from "pixi.js";
 import { QuestionController, QuestionView } from "../class/Question";
 import type { QuestionTableItem } from "../class/table_item";
-import type { HorizontalSegmentOptions } from "../component/segment";
+import { HorizontalSegmentOperator, type HorizontalSegmentInitializer } from "../component/segment";
 import type { ArrowInitializer } from "../component/arrow";
 
 function string_format(str: string, ...args: any[]) {
@@ -17,7 +17,7 @@ type NumberPool = {
 class Question_1 extends QuestionView{
     private analyze_panel:Container | null = null;
     private m_number : NumberPool = {a : 0, x : 0, y : 0}
-    private m_segment_options : HorizontalSegmentOptions[] = []
+    private m_segment_initializers : HorizontalSegmentInitializer[] = []
     constructor() {
         super("")
         this.draw_answer_function = [
@@ -53,26 +53,27 @@ class Question_1 extends QuestionView{
         this.analyze_panel.y = 20
         this.addChild(this.analyze_panel)
 
-        this.m_segment_options.push({
-            point_x: [this.m_number.x, this.m_number.a],
-            point_y: 20,
+        this.m_segment_initializers.push({
+            begin_point:{x:this.m_number.x,y:20},
             scale : 3,
-            segment_color: new Map(),
-            tip_options : new Map(),
+            segments : [{
+                width:this.m_number.a
+            }]
         },{
-            point_x: [this.m_number.x,this.m_number.a,this.m_number.a * 2 - this.m_number.x],
-            point_y: 20,
+            begin_point:{x:this.m_number.x,y:20},
             scale : 3,
-            segment_color: new Map(),
-            tip_options : new Map(),
+            segments : [{
+                width:this.m_number.a
+            },{
+                width:this.m_number.a
+            }]
         },{
-            point_x: [this.m_number.x,this.m_number.y + this.m_number.x],
-            point_y: 20,
+            begin_point:{x:this.m_number.x,y:20},
             scale : 3,
-            segment_color: new Map(),
-            tip_options : new Map(),
+            segments : [{
+                width:this.m_number.y
+            }]
         })
-
     }
 
     private answer_0(){
@@ -81,34 +82,38 @@ class Question_1 extends QuestionView{
     }
     private answer_1(){
         this.m_pipeline.make_text("甲：").attach_to(this.analyze_panel).set_position(0,60)
-        this.m_pipeline.make_horiaontal_segment(this.m_segment_options[0]!).attach_to(this.analyze_panel).set_position(60,60).tag("answer.1.segment")
+        this.m_pipeline.make_horiaontal_segment(this.m_segment_initializers[0]!).attach_to(this.analyze_panel).set_position(60,60).tag("answer.1.segment")
 
         this.m_pipeline.make_text("乙：").attach_to(this.analyze_panel).set_position(0,120)
-        this.m_pipeline.make_horiaontal_segment(this.m_segment_options[1]!).attach_to(this.analyze_panel).set_position(60,120).tag("answer.2.segment")
+        this.m_pipeline.make_horiaontal_segment(this.m_segment_initializers[1]!).attach_to(this.analyze_panel).set_position(60,120).tag("answer.2.segment")
 
         this.m_pipeline.make_text("丙：").attach_to(this.analyze_panel).set_position(0,180)
-        this.m_pipeline.make_horiaontal_segment(this.m_segment_options[2]!).attach_to(this.analyze_panel).set_position(60,180).tag("answer.3.segment")
+        this.m_pipeline.make_horiaontal_segment(this.m_segment_initializers[2]!).attach_to(this.analyze_panel).set_position(60,180).tag("answer.3.segment")
 
     }
 
     private answer_2(){
-        this.m_segment_options[this.m_segment_options.length - 1]!.tip_options?.set(1,{text : this.m_number.y + ""})
+        this.m_segment_initializers[2]!.segments[0]!.tip = this.m_number.y + ""
         this.m_pipeline.redraw("answer.3.segment")
     }
      
 
     private answer_3(){
-        // 花了相同的钱，这里补上
-        this.m_segment_options[0]!.point_x.unshift(0);
-        this.m_segment_options[1]!.point_x.unshift(0);
-        this.m_segment_options[2]!.point_x.unshift(0);
-        
-        this.m_segment_options[0]!.segment_color.set(1,"red")
-        this.m_segment_options[1]!.segment_color.set(1,"red")
-        this.m_segment_options[2]!.segment_color.set(1,"red")
 
-        this.m_segment_options[2]!.tip_options?.delete(1);
-        this.m_segment_options[2]!.tip_options?.set(2,{text : this.m_number.y + ""})
+
+        HorizontalSegmentOperator.insert(0,{width:this.m_number.x},this.m_segment_initializers[0]!)
+        this.m_segment_initializers[0]!.begin_point.x -= this.m_number.x;
+        this.m_segment_initializers[0]!.segments[0]!.color = "red"
+        
+        HorizontalSegmentOperator.insert(0,{width:this.m_number.x},this.m_segment_initializers[1]!)
+        this.m_segment_initializers[1]!.begin_point.x -= this.m_number.x;
+        this.m_segment_initializers[1]!.segments[0]!.color = "red"
+
+        HorizontalSegmentOperator.insert(0,{width:this.m_number.x},this.m_segment_initializers[2]!)
+        this.m_segment_initializers[2]!.begin_point.x -= this.m_number.x;
+        this.m_segment_initializers[2]!.segments[0]!.color = "red"
+
+        // 花了相同的钱，这里补上
 
         this.m_pipeline.make_text("1.花了相同的钱").attach_to(this.analyze_panel).set_position(30,240).tag("answer.3.tip");
         this.m_pipeline.redraw("answer.1.segment","answer.2.segment","answer.3.segment")
@@ -121,11 +126,8 @@ class Question_1 extends QuestionView{
        this.m_pipeline.make_text(tip).attach_to(this.analyze_panel).set_position(30,280).tag("answer.4.tip");
     }
     private answer_5(){
-        // 把已知的长度移到总和-多少这里
-        // [0,x,y]
-        this.m_segment_options[2]?.point_x.splice(2,1); 
-        this.m_segment_options[2]?.tip_options?.delete(2);
-        this.m_segment_options[2]!.segment_color.delete(1)  
+        
+        HorizontalSegmentOperator.remove(1,this.m_segment_initializers[2]!)
         this.m_pipeline.redraw("answer.3.segment")
 
         const total = 3 * this.m_number.a + this.m_number.y;
@@ -139,10 +141,13 @@ class Question_1 extends QuestionView{
     // t = 3 * a + y
 
     private answer_6(){
+
+        this.m_pipeline.make_horiaontal_segment().move_to()
+
         // 把某一个多的线段移到少的，
         //[0,x, a,]
-        this.m_segment_options[1]?.point_x.splice(3,1);
-        this.m_segment_options[2]?.point_x.push(this.m_number.a);
+        HorizontalSegmentOperator.remove(2,this.m_segment_initializers[1]!)
+        HorizontalSegmentOperator.insert(1,{width : this.m_number.a},this.m_segment_initializers[2]!);
         
         this.m_pipeline.redraw("answer.2.segment","answer.3.segment")
 
