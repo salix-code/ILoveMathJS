@@ -3,7 +3,7 @@ import { AnimationSystem } from '../class/anim';
 import { Expression } from '../component/expression';
 import { Arrow, type ArrowInitializer } from '../component/arrow';
 import { Line } from '../component/line';
-import { HorizontalSegment, Segment, type HorizontalSegmentOptions, type SegmentPoint } from '../component/segment';
+import { HorizontalSegment, type HorizontalSegmentOptions } from '../component/segment';
 
 export interface PipelineContext{
     view:Map<string,Container>;
@@ -65,8 +65,8 @@ export class Pipeline{
         return this.current;
         
     }
-    public get_view_by_tag(tag:string):Container|undefined{
-        return this.context.view.get(tag);
+    public get_view_by_tag(tag:string):Container|any{
+        return this.context.view.get(tag)!;
     }
 
     protected save_view(view:Container){
@@ -231,7 +231,7 @@ export class Pipeline{
         initializer.end_point.size = {width:from_label.width,height:from_label.height};
         
         this.create_arrow(initializer)
-        parent.addChild(this.current);
+        parent.addChild(this.current!);
         return this;
     }
 

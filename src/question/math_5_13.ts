@@ -1,4 +1,4 @@
-import { Container } from "pixi.js";
+import { Container,Text } from "pixi.js";
 import { QuestionController, QuestionView } from "../class/Question";
 import type { QuestionTableItem } from "../class/table_item";
 import type { HorizontalSegmentOptions } from "../component/segment";
@@ -39,14 +39,14 @@ class Question_1 extends QuestionView{
     public regenerate(): void {
 
         this.m_number.a =70;
-        this.m_number.x = 8;
+        this.m_number.x = 20;
         this.m_number.y = 12;
         const total = this.m_number.a * 3 + this.m_number.y;
         const text = string_format("三个小朋友一共有{0}，\n每人花去相同的钱后，\n丙还剩下{1}元钱，\n乙剩下的钱数是甲剩下的2倍，\n那么甲原有多少钱",total,this.m_number.y)
 
         this.m_pipeline.make_text(text).attach_to(this).set_position(100,20)
 
-        this.m_pipeline.make_vertical_line(500,20,500).attach_to(this)
+        this.m_pipeline.make_vertical_line(480,20,480).attach_to(this)
 
         this.analyze_panel = new Container();
         this.analyze_panel.x = 500
@@ -56,16 +56,19 @@ class Question_1 extends QuestionView{
         this.m_segment_options.push({
             point_x: [this.m_number.x, this.m_number.a],
             point_y: 20,
+            scale : 3,
             segment_color: new Map(),
             tip_options : new Map(),
         },{
             point_x: [this.m_number.x,this.m_number.a,this.m_number.a * 2 - this.m_number.x],
             point_y: 20,
+            scale : 3,
             segment_color: new Map(),
             tip_options : new Map(),
         },{
-            point_x: [this.m_number.x,this.m_number.y],
+            point_x: [this.m_number.x,this.m_number.y + this.m_number.x],
             point_y: 20,
+            scale : 3,
             segment_color: new Map(),
             tip_options : new Map(),
         })
@@ -77,19 +80,20 @@ class Question_1 extends QuestionView{
         this.m_pipeline.make_text(text).attach_to(this.analyze_panel).set_position(0,20)
     }
     private answer_1(){
-        this.m_pipeline.make_text("甲：").attach_to(this.analyze_panel).set_position(0,40)
-        this.m_pipeline.make_horiaontal_segment(this.m_segment_options[0]!).attach_to(this.analyze_panel).set_position(20,40).tag("answer.1.segment")
+        this.m_pipeline.make_text("甲：").attach_to(this.analyze_panel).set_position(0,60)
+        this.m_pipeline.make_horiaontal_segment(this.m_segment_options[0]!).attach_to(this.analyze_panel).set_position(60,60).tag("answer.1.segment")
 
-        this.m_pipeline.make_text("乙：").attach_to(this.analyze_panel).set_position(0,40)
-        this.m_pipeline.make_horiaontal_segment(this.m_segment_options[1]!).attach_to(this.analyze_panel).set_position(20,40).tag("answer.2.segment")
+        this.m_pipeline.make_text("乙：").attach_to(this.analyze_panel).set_position(0,120)
+        this.m_pipeline.make_horiaontal_segment(this.m_segment_options[1]!).attach_to(this.analyze_panel).set_position(60,120).tag("answer.2.segment")
 
-        this.m_pipeline.make_text("丙：").attach_to(this.analyze_panel).set_position(0,40)
-        this.m_pipeline.make_horiaontal_segment(this.m_segment_options[2]!).attach_to(this.analyze_panel).set_position(20,40).tag("answer.3.segment")
+        this.m_pipeline.make_text("丙：").attach_to(this.analyze_panel).set_position(0,180)
+        this.m_pipeline.make_horiaontal_segment(this.m_segment_options[2]!).attach_to(this.analyze_panel).set_position(60,180).tag("answer.3.segment")
 
     }
 
     private answer_2(){
-        this.m_segment_options[this.m_segment_options.length - 1]!.tip_options?.set(0,{text : this.m_number.y + ""})
+        this.m_segment_options[this.m_segment_options.length - 1]!.tip_options?.set(1,{text : this.m_number.y + ""})
+        this.m_pipeline.redraw("answer.3.segment")
     }
      
 
@@ -103,47 +107,51 @@ class Question_1 extends QuestionView{
         this.m_segment_options[1]!.segment_color.set(1,"red")
         this.m_segment_options[2]!.segment_color.set(1,"red")
 
-        this.m_pipeline.make_text("花了相同的钱").attach_to(this.analyze_panel).set_position(0,0).tag("answer.2.tip");
+        this.m_segment_options[2]!.tip_options?.delete(1);
+        this.m_segment_options[2]!.tip_options?.set(2,{text : this.m_number.y + ""})
+
+        this.m_pipeline.make_text("1.花了相同的钱").attach_to(this.analyze_panel).set_position(30,240).tag("answer.3.tip");
         this.m_pipeline.redraw("answer.1.segment","answer.2.segment","answer.3.segment")
 
     }
     private answer_4(){
        // 总长度
        const total = 3 * this.m_number.a + this.m_number.y;
-       const tip = string_format("三条线总长度{0}",total + "");
-       this.m_pipeline.make_text(tip).attach_to(this.analyze_panel).set_position(100,20).tag("answer.4.tip");
+       const tip = string_format("2.三条线总长度 {0}",total + "");
+       this.m_pipeline.make_text(tip).attach_to(this.analyze_panel).set_position(30,280).tag("answer.4.tip");
     }
     private answer_5(){
         // 把已知的长度移到总和-多少这里
+        // [0,x,y]
+        this.m_segment_options[2]?.point_x.splice(2,1); 
+        this.m_segment_options[2]?.tip_options?.delete(2);
+        this.m_segment_options[2]!.segment_color.delete(1)  
+        this.m_pipeline.redraw("answer.3.segment")
 
-        this.m_segment_options[2]?.point_x.slice(1,1);       
-        this.m_pipeline.redraw("answer.5.segment")
-
-        const label = this.m_pipeline.get_view_by_tag("answer.5.tip") as Text;
         const total = 3 * this.m_number.a + this.m_number.y;
-        label.text = string_format("总长度{0} - {1}",total + "",this.m_number.y + "");
+        const tip = string_format("3. 移除掉已知的长度，三条线总长度总长度 变成 {0} - {1}",total + "",this.m_number.y + "");
+        this.m_pipeline.make_text(tip).attach_to(this.analyze_panel).set_position(30,320).tag("answer.5.tip");
     }
 
     // [0,x] [ x ,a] => [0,x,a]
     // [0,x] [x ,a ] [a,a + a - x] => [0,x,a,aa-2]
-    // [0,x] [x ,y] => [0,x,y]
+    // [0,x] [x ,y] => [0,x,x+y]
     // t = 3 * a + y
 
     private answer_6(){
         // 把某一个多的线段移到少的，
-
-        this.m_segment_options[1]?.point_x.slice(2);
+        //[0,x, a,]
+        this.m_segment_options[1]?.point_x.splice(3,1);
         this.m_segment_options[2]?.point_x.push(this.m_number.a);
-        this.m_segment_options[2]?.segment_color.set(1,'red');
-
+        
         this.m_pipeline.redraw("answer.2.segment","answer.3.segment")
 
-        const label = this.m_pipeline.get_view_by_tag("answer.5.tip") as Text;
-
-        label.text = string_format("三个数平均是：{0}",0);
+        const total = 3 * this.m_number.a + this.m_number.y;
+        const tip = string_format("4.三个数平均是：({0} - {1}) / 3 = {2}",total,this.m_number.y,this.m_number.a);
+        this.m_pipeline.make_text(tip).attach_to(this.analyze_panel).set_position(30,360).tag("answer.6.tip");
 
         let arrow_initializer = { } as ArrowInitializer
-        this.m_pipeline.make_arrow("answer.2.segment","answer.3.segment",this.analyze_panel,arrow_initializer).tag("answer.6.arrow");
+        this.m_pipeline.make_arrow("answer.2.segment","answer.3.segment",this.analyze_panel!,arrow_initializer).tag("answer.6.arrow");
 
     }
     private answer_7(){

@@ -12,11 +12,11 @@ export interface ArrowOptions {
 export type ArrowInitializer = {
     start_point : {
         point : Vector4,
-        size : PIXI.ISize,
+        size : PIXI.Size,
     }
     end_point : {
         point : Vector4,
-        size : PIXI.ISize,
+        size : PIXI.Size,
     }
     option?:ArrowOptions
 }
@@ -36,24 +36,22 @@ export class Arrow extends PIXI.Graphics {
         this.clear();
 
         const {
-            option = {
-                color : 0xFFFFFF,
-                width : 2,
-                headLength : 8,
-                headAngle : Math.PI / 7
-            }
-        } = this.m_initializer;
+            color = 0xFFFFFF,
+            width = 2,
+            headLength = 8,
+            headAngle = Math.PI / 7
+        } = this.m_initializer.option || {};
 
         let coordination = this.m_initializer.start_point;
         const x1 = coordination.point.x + coordination.point.z * coordination.size.width;
         const y1 = coordination.point.y + coordination.point.w * coordination.size.height;
 
-        coordination = this.m_initializer.start_point;
+        coordination = this.m_initializer.end_point;
         const x2 = coordination.point.x + coordination.point.z * coordination.size.width;
         const y2 = coordination.point.y + coordination.point.w * coordination.size.height;
 
         // 主线体
-        this.lineStyle(option.width, option.color);
+        this.lineStyle(width, color);
         this.moveTo(x1, y1);
         this.lineTo(x2, y2);
         

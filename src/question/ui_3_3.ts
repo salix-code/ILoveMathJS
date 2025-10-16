@@ -3,7 +3,7 @@ import { Line } from '../component/line';
 
 import { type AnimationItem,type AnimationData ,AnimationSystem} from "../class/anim";
 import { Arrow } from '../component/arrow';
-import { Helper } from '../class/Help';
+
 
 function format(str: string, ...args: any[]) {
     return str.replace(/{(\d+)}/g, (match, index) => args[index]);

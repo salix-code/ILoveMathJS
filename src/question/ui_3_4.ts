@@ -81,8 +81,8 @@ class Question_1 extends QuestionView{
         
         point3.y -= 30;
 
-        this.m_pipeline.push_slot("answer.2.arrow.1").create(Arrow,point1.x + 5,point1.y,point3.x + 10,point3.y).attach_to(this).pop_slot();
-        this.m_pipeline.push_slot("answer.2.arrow.2").create(Arrow,point2.x + 5,point2.y,point3.x + 15,point3.y).attach_to(this).pop_slot();
+        //this.m_pipeline.push_slot("answer.2.arrow.1").create(Arrow,point1.x + 5,point1.y,point3.x + 10,point3.y).attach_to(this).pop_slot();
+       // this.m_pipeline.push_slot("answer.2.arrow.2").create(Arrow,point2.x + 5,point2.y,point3.x + 15,point3.y).attach_to(this).pop_slot();
     }
     private hide_arrow(tag:string){
         const arrow = this.m_pipeline.get_view_by_tag(tag)!;

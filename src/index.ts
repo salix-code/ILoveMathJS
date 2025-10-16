@@ -2,7 +2,8 @@ import { Application, Container,Text,Point } from 'pixi.js';
 
 import { APP_QuestionTable } from './question/table';
 import { AnimationSystem } from './class/anim';
-import { Arrow } from './component/arrow';
+import { Arrow, type ArrowInitializer } from './component/arrow';
+import { Vector4 } from './maths/vector';
 
 
 const app = new Application();
@@ -22,7 +23,21 @@ type TableItem = {
 
 const scene = new Container();
 const table_items :TableItem[] = [];
-const arrow = new Arrow(100,100,120,100,{color:0xff0000, width:2, headLength:10});
+
+const arrow_initializer : ArrowInitializer = {
+    start_point : {
+        point: new Vector4(100,100,0,0),
+        size : {width : 0,height : 0}
+    },
+    end_point : {
+        point: new Vector4(120,10,0,0),
+        size : {width : 0,height : 0}
+    },
+    option : {
+
+    }
+}
+const arrow = new Arrow(arrow_initializer);
 app.stage.addChild(arrow);
 
 type TableOptions = {
@@ -63,7 +78,13 @@ function select_table_item(index:number){
     selected_table_item_index = index;
     const x = table_items[selected_table_item_index]!.position.x;
     const y = table_items[selected_table_item_index]!.position.y;
-    arrow.setPoints(x,y,x + 20,y);
+   // arrow.setPoints(x,y,x + 20,y);
+   arrow_initializer.start_point.point.x = x;
+   arrow_initializer.start_point.point.y = y;
+   arrow_initializer.end_point.point.x = x + 20;
+   arrow_initializer.end_point.point.y = y;
+
+   arrow.redraw();
 }
 
 function show_select_category(){
