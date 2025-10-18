@@ -32,13 +32,10 @@ class Question_1 extends QuestionView{
         ]
         this.regenerate()
     }
-    // [0,x] [ x ,a]
-    // [0,x] [x ,a,a + a - x ]
-    // [0,x] [x ,y]
-    // t = 3 * a + y
+    //[0,x] [x,a]
     public regenerate(): void {
 
-        this.m_number.a =70;
+        this.m_number.a =50;
         this.m_number.x = 20;
         this.m_number.y = 12;
         const total = this.m_number.a * 3 + this.m_number.y;
@@ -103,15 +100,15 @@ class Question_1 extends QuestionView{
 
         HorizontalSegmentOperator.insert(0,{width:this.m_number.x},this.m_segment_initializers[0]!)
         this.m_segment_initializers[0]!.begin_point.x -= this.m_number.x;
-        this.m_segment_initializers[0]!.segments[0]!.color = "red"
+        this.m_segment_initializers[0]!.segments[0]!.color = "yellow"
         
         HorizontalSegmentOperator.insert(0,{width:this.m_number.x},this.m_segment_initializers[1]!)
         this.m_segment_initializers[1]!.begin_point.x -= this.m_number.x;
-        this.m_segment_initializers[1]!.segments[0]!.color = "red"
+        this.m_segment_initializers[1]!.segments[0]!.color = "yellow"
 
         HorizontalSegmentOperator.insert(0,{width:this.m_number.x},this.m_segment_initializers[2]!)
         this.m_segment_initializers[2]!.begin_point.x -= this.m_number.x;
-        this.m_segment_initializers[2]!.segments[0]!.color = "red"
+        this.m_segment_initializers[2]!.segments[0]!.color = "yellow"
 
         // 花了相同的钱，这里补上
 
@@ -121,7 +118,7 @@ class Question_1 extends QuestionView{
     }
     private answer_4(){
        // 总长度
-       const total = 3 * this.m_number.a + this.m_number.y;
+       const total = 3 * (this.m_number.x + this.m_number.a) + this.m_number.y;
        const tip = string_format("2.三条线总长度 {0}",total + "");
        this.m_pipeline.make_text(tip).attach_to(this.analyze_panel).set_position(30,280).tag("answer.4.tip");
     }
@@ -130,7 +127,7 @@ class Question_1 extends QuestionView{
         HorizontalSegmentOperator.remove(1,this.m_segment_initializers[2]!)
         this.m_pipeline.redraw("answer.3.segment")
 
-        const total = 3 * this.m_number.a + this.m_number.y;
+        const total = 3 * ( this.m_number.a + this.m_number.x) + this.m_number.y;
         const tip = string_format("3. 移除掉已知的长度，三条线总长度总长度 变成 {0} - {1}",total + "",this.m_number.y + "");
         this.m_pipeline.make_text(tip).attach_to(this.analyze_panel).set_position(30,320).tag("answer.5.tip");
     }
@@ -142,22 +139,28 @@ class Question_1 extends QuestionView{
 
     private answer_6(){
 
-        this.m_pipeline.make_horiaontal_segment().move_to()
+        const initializer : HorizontalSegmentInitializer = {
+            begin_point : {x : this.m_number.a + this.m_number.x ,y : 20},
+            segments : [{
+                width : this.m_number.a
+            }]
+        }
+        this.m_pipeline.make_horiaontal_segment(initializer).attach_to(this.analyze_panel).set_position(0,120).move_to(0,180);
 
-        // 把某一个多的线段移到少的，
-        //[0,x, a,]
+        
+    }
+    private refresh_answer_6(){
         HorizontalSegmentOperator.remove(2,this.m_segment_initializers[1]!)
         HorizontalSegmentOperator.insert(1,{width : this.m_number.a},this.m_segment_initializers[2]!);
         
         this.m_pipeline.redraw("answer.2.segment","answer.3.segment")
 
-        const total = 3 * this.m_number.a + this.m_number.y;
+        const total = 3 * ( this.m_number.a + this.m_number.x) + this.m_number.y;
         const tip = string_format("4.三个数平均是：({0} - {1}) / 3 = {2}",total,this.m_number.y,this.m_number.a);
         this.m_pipeline.make_text(tip).attach_to(this.analyze_panel).set_position(30,360).tag("answer.6.tip");
 
         let arrow_initializer = { } as ArrowInitializer
         this.m_pipeline.make_arrow("answer.2.segment","answer.3.segment",this.analyze_panel!,arrow_initializer).tag("answer.6.arrow");
-
     }
     private answer_7(){
         

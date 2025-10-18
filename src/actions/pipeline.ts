@@ -3,7 +3,7 @@ import { AnimationSystem } from '../class/anim';
 import { Expression } from '../component/expression';
 import { Arrow, type ArrowInitializer } from '../component/arrow';
 import { Line } from '../component/line';
-import { HorizontalSegment, type HorizontalSegmentOptions } from '../component/segment';
+import { HorizontalSegment, type HorizontalSegmentInitializer } from '../component/segment';
 
 export interface PipelineContext{
     view:Map<string,Container>;
@@ -163,7 +163,7 @@ export class Pipeline{
         
     }
 
-    public make_horiaontal_segment(optios:HorizontalSegmentOptions){
+    public make_horiaontal_segment(optios:HorizontalSegmentInitializer){
         if (!optios) {
             return this;
         }

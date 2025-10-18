@@ -43,28 +43,33 @@ export class HorizontalSegment extends PIXI.Container{
     }
     private redraw(){
         this.removeChildren();
+        this.segment.clear();
         this.addChild(this.segment);
 
         if(this.initializer.segments.length == 0){
             return;
         }
-        
-        let x = this.initializer.begin_point.x;
-        const y = this.initializer.begin_point.y
-        const scale = this.initializer.scale??1;
-        let segment_index = 0;
-        for(let segment of this.initializer.segments){
-            const color = segment.color??"white";
-            this.segment.stroke({color:color,width:1});
 
-            this.segment.moveTo(x, y - 10);
-            this.segment.lineTo(x, y);
-            this.segment.lineTo(x + segment.width, y);
+        const scale = this.initializer.scale??1;
+        
+        let x = this.initializer.begin_point.x * scale;
+        const y = this.initializer.begin_point.y
+        
+        let segment_index = 0;
+        this.segment.beginPath()
+        let color = "white";
+        for(let segment of this.initializer.segments){
+            color = segment.color ?? "white";
+            
+            this.segment.moveTo(x, y - 10)
+                .lineTo(x,y)
+                .lineTo(x + segment.width * scale,y)
+                .stroke({color:color,width:1});
             
             if(segment.tip){
                 let label = this.tip.get(segment_index)!;
                 if(!label){
-                    label = new new PIXI.Text()
+                    label = new PIXI.Text()
                     this.tip.set(segment_index,label);
                 }
                 if(label){
@@ -73,18 +78,14 @@ export class HorizontalSegment extends PIXI.Container{
                     const font_color = 'yellow';
                     label.style = {fill:font_color, fontSize:font_size};
                     this.addChild(label);
-                    label.x = x + segment.width / 2 - label.width / 2;
+                    label.x = x + segment.width * scale / 2 - label.width / 2;
                     label.y = y - 20;
                 }
             }
-
-            x = x + segment.width;
+            x = x + segment.width * scale;
             segment_index += 1
         }
-
-        this.segment.moveTo(x, y - 10);
-        this.segment.lineTo(x, y);
-        
+        this.segment.moveTo(x, y - 10).lineTo(x, y).stroke({color:color,width:1});
         
     }
 }
