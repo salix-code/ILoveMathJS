@@ -13,7 +13,7 @@ export class Line extends PIXI.Graphics {
     public redraw() {
         this.clear();
         
-        this.lineStyle(1, 0xFF0000);
+        this.lineStyle(1, 0xFFFFFF);
 
         // 绘制直线：从 (50, 50) 到 (200, 50)
         this.moveTo(this.point_x[0]!, this.point_y[0]!);

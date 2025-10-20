@@ -2,10 +2,11 @@
 import { Ticker } from 'pixi.js';
 
 export interface DelayTask{
-    process : (()=>void) | null;
+    process : ((loop_counter:number)=>void) | null;
     seconds : number;
     remind : number;
     loop : number;
+    loop_counter : number;
 }
 
 export class DelayPipeline {
@@ -17,8 +18,8 @@ export class DelayPipeline {
     constructor(){
 
     }
-    public delay(func:()=>void,seconds:number = 0,loop:number = 1){
-        this.m_tasks.push({process:func,seconds:seconds,remind:seconds,loop:loop});
+    public delay(func:(loop_counter:number)=>void,seconds:number = 0,loop:number = 1){
+        this.m_tasks.push({process:func,seconds:seconds,remind:seconds,loop:loop,loop_counter : 0});
         return this;
     }
     private onStart(){
@@ -45,9 +46,10 @@ export class DelayPipeline {
             task.remind -= delta;
             if(task.remind <= 0){
                 if(task.process){
-                    task.process()
+                    task.process(task.loop_counter)
                 }
                 task.loop -= 1;
+                task.loop_counter += 1;
                 if(task.loop > 0){
                     task.remind += task.seconds;
                 }else{
@@ -72,7 +74,7 @@ export class DelayManager {
     private static instance: DelayManager;
     private m_delay_pipeline :DelayPipeline[] = [];
 
-    private m_tick : ((delta: number) => void) | null = null;
+    private m_tick : ((ticker:Ticker) => void) | null = null;
 
     public static getInstance(): DelayManager {
         if (!DelayManager.instance) {
@@ -93,10 +95,10 @@ export class DelayManager {
         this.m_delay_pipeline.push(task_pipeline);
         return task_pipeline
     }
-    private tick(delta:number){
+    private tick(ticker:Ticker){
         
         for(let item of this.m_delay_pipeline){
-            item.tick(delta);
+            item.tick(ticker.deltaTime);
         }
         for(let i = this.m_delay_pipeline.length - 1; i >= 0; --i){
             const item = this.m_delay_pipeline[i]!
@@ -106,7 +108,9 @@ export class DelayManager {
         }
 
         if(this.m_delay_pipeline.length == 0){
-            Ticker.shared.remoe(this.m_tick);
+            if(this.m_tick){
+                Ticker.shared.remove(this.m_tick);
+            }
             this.m_tick = null;
         }
     }

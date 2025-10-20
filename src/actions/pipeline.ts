@@ -163,6 +163,12 @@ export class Pipeline{
         
     }
 
+    public make_horiaontal_line(x:number,y : number,length : number){
+        let line = new Line(x,y,x + length,y);
+        this.current = line
+        return this
+    }
+
     public make_horiaontal_segment(optios:HorizontalSegmentInitializer){
         if (!optios) {
             return this;

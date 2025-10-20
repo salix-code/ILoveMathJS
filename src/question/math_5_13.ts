@@ -3,7 +3,7 @@ import { QuestionController, QuestionView } from "../class/Question";
 import type { QuestionTableItem } from "../class/table_item";
 import { HorizontalSegmentOperator, type HorizontalSegmentInitializer } from "../component/segment";
 import type { ArrowInitializer } from "../component/arrow";
-import { DelayManager, TaskManager } from "../actions/delaymanager";
+
 
 function string_format(str: string, ...args: any[]) {
     return str.replace(/{(\d+)}/g, (match, index) => String(args[index]));
@@ -35,6 +35,8 @@ class Question_1 extends QuestionView{
     }
     //[0,x] [x,a]
     public regenerate(): void {
+
+        this.clean();
 
         this.m_number.a =50;
         this.m_number.x = 20;
@@ -140,29 +142,13 @@ class Question_1 extends QuestionView{
 
     private answer_6(){
 
-        const initializer : HorizontalSegmentInitializer = {
-            begin_point : {x : this.m_number.a + this.m_number.x ,y : 20},
-            segments : [{
-                width : this.m_number.a
-            }]
-        }
-        this.m_pipeline.make_horiaontal_segment(initializer).attach_to(this.analyze_panel).set_position(0,120).move_to(0,180);
+        HorizontalSegmentOperator.remove(2,this.m_segment_initializers[1]);
+        HorizontalSegmentOperator.insert(1,{width:this.m_number.a},this.m_segment_initializers[2]);
 
-        
-    }
-    private refresh_answer_6(){
-        HorizontalSegmentOperator.remove(2,this.m_segment_initializers[1]!)
-        HorizontalSegmentOperator.insert(1,{width : this.m_number.a},this.m_segment_initializers[2]!);
-        
         this.m_pipeline.redraw("answer.2.segment","answer.3.segment")
-
-        const total = 3 * ( this.m_number.a + this.m_number.x) + this.m_number.y;
-        const tip = string_format("4.三个数平均是：({0} - {1}) / 3 = {2}",total,this.m_number.y,this.m_number.a);
-        this.m_pipeline.make_text(tip).attach_to(this.analyze_panel).set_position(30,360).tag("answer.6.tip");
-
-        let arrow_initializer = { } as ArrowInitializer
-        this.m_pipeline.make_arrow("answer.2.segment","answer.3.segment",this.analyze_panel!,arrow_initializer).tag("answer.6.arrow");
+        
     }
+    
     private answer_7(){
         
     }
@@ -171,36 +157,54 @@ class Question_1 extends QuestionView{
 
 
 class Question_2 extends QuestionView{
-    private m_number : {x:number,y:number,a:number} = {x : 0,y : 0,a : 0};
+    private m_number : {x:number,a:number} = {x : 0,a : 0};
+    private analyze_panel:Container | null = null;
     constructor(){
         super("")
+        this.draw_answer_function = [
+            this.answer_0.bind(this)
+        ]
+        this.regenerate();
     }
     public regenerate(): void {
-        const question_des = ["妈妈买回来一些苹果和橘子,丁丁数了数\n","其中有{0}个苹果，","橘子的个数是苹果的{1}倍","","请问橘子有多个少？"]
-        // t = a x + y
-        this.m_number.x = Math.floor(Math.random() * 12 + 8);
+        this.clean();
+        const question_array = [
+            "妈妈买回来一些苹果和橘子,\n丁丁数了数,其中有{0}个苹果,\n橘子的个数是苹果的{1}倍{2}\n,请问橘子有多少个?"
+        ]
+
+        this.analyze_panel = new Container();
+        this.analyze_panel.x = 500
+        this.analyze_panel.y = 20
+        this.addChild(this.analyze_panel)
+
+        this.m_pipeline.make_vertical_line(480,20,480).attach_to(this)
+        
+        this.m_number.x = Math.floor(Math.random() * 18 + 2);
         this.m_number.a = Math.floor(Math.random() * 3 + 3);
+        
+
         const b = Math.random() * 2;
+        let m_text = ""
         if(b == 1)
         {
             const neg = Math.random() * 2;
-            this.m_number.y = Math.floor(Math.random() * 20 + 1) % this.m_number.x;
+            const m = Math.floor(Math.random() * (this.m_number.x - 1) ) + 1;
             if(neg == 0){
-                this.m_number.y *= -1;
+                m_text = "多" + m + "个"
+            } else {
+                m_text = "少" + m + "个"
             }
         }
+        const question_index = Math.floor(Math.random() * question_array.length);
+        const text = string_format(question_array[question_index]!,this.m_number.x,this.m_number.a,m_text)
+        this.m_pipeline.make_text(text).attach_to(this).set_position(100,20);
+    }
 
-        question_des[1] = string_format(question_des[1]!,this.m_number.x);
-        question_des[2] = string_format(question_des[2]!,this.m_number.a);
-        if(this.m_number.y > 0){
-            question_des[3] = string_format("多{0}个\n",this.m_number.y);
-        }
-        else if(this.m_number.y < 0){
-            question_des[3] = string_format("少{0}个\n",this.m_number.y);
-        }
+    private answer_0(){
+        const text = "解"
+        this.m_pipeline.make_text(text).attach_to(this.analyze_panel).set_position(0,20)
 
-        const text = question_des.join(",");
-        this.m_pipeline.make_text(text).attach_to(this).set_position(100,20)
+        this.m_pipeline.make_text("橘子的数量是: " + this.m_number.x + "x" + this.m_number.a).attach_to(this.analyze_panel).set_position(20,60);
     }
 }
 
@@ -213,35 +217,19 @@ class Question_3 extends QuestionView{
     public regenerate(): void {
         this.clean();
 
-        const question_des = ["妈妈买回来一些苹果和橘子,丁丁数了数\n","其中有{0}个橘子，","橘子的个数是苹果的{1}倍","","苹果有多个少？"]
-        // y = (x - m) / a
-        const y = Math.floor(Math.random() * 12 + 8);
+        const question_array = [
+            "妈妈买回来一些苹果和橘子,丁丁数了数\n其中有{0}个橘子，橘子的个数是苹果的{1}倍{2},苹果有多个少？"
+        ]
+        
+        const apple = Math.floor(Math.random() * 12 + 8);
         this.m_number.a = Math.floor(Math.random() * 3 + 3);
-        this.m_number.x = y * this.m_number.a;
-        const b = Math.random() * 10;
-        if(b <= 1)
-        {
-           this.m_number.m = 0
-        }
-        else if(b <= 5){
-            this.m_number.m = Math.floor(Math.random() * (this.m_number.a - 1) ) + 1;
+        this.m_number.x = apple * this.m_number.a;
+       
 
-        }
-        else{
-            this.m_number.m = -1 * (Math.floor(Math.random() * (this.m_number.a - 1) ) + 1);
-        }
+        const question_index = Math.floor(Math.random() * question_array.length)
 
-        question_des[1] = string_format(question_des[1]!,this.m_number.x);
-        question_des[2] = string_format(question_des[2]!,this.m_number.a);
-        if(this.m_number.m > 0){
-            question_des[3] = string_format("多{0}个\n",this.m_number.m);
-        }
-        else if(this.m_number.m < 0){
-            question_des[3] = string_format("少{0}个\n",this.m_number.m);
-        }
-
-        const text = question_des.join(",");
-        this.m_pipeline.make_text(text).attach_to(this).set_position(100,20)
+        const text = string_format(question_array[question_index]!,this.m_number.x,this.m_number.a,"");
+        this.m_pipeline.make_text(text).attach_to(this).set_position(100,40)
     }
 }
 
@@ -295,7 +283,9 @@ class Question_5 extends QuestionView{
     public regenerate(): void {
         this.clean();
 
-        const question_des = ["妈妈买回来一些苹果和橘子,丁丁数了数\n","一共买了{0}个","橘子的个数是苹果的{0}倍，","","橘子和苹果各有多个少？"]
+        const question_array = [
+            "妈妈买回来一些苹果和橘子,丁丁数了数\n，一共买了{0}个，橘子的个数是苹果的{1}倍{2}，橘子和苹果各有多个少？"
+        ]
         // x = t / (a + 1)
         // y = x * a
         this.m_number.a = Math.floor(Math.random() * 3 + 3);
@@ -314,17 +304,15 @@ class Question_5 extends QuestionView{
             this.m_number.m = -1 * (Math.floor(Math.random() * (this.m_number.a - 1) ) + 1);
         }
         this.m_number.t = apple + orange + this.m_number.m;
-
-        question_des[1] = string_format(question_des[1]!,this.m_number.t);
-        question_des[2] = string_format(question_des[2]!,this.m_number.a);
-        if(this.m_number.m > 0){
-            question_des[3] = string_format("多{0}个\n",this.m_number.m);
+        let external_text = "";
+        if (this.m_number.m > 0){
+            external_text =string_format("多{0}个",this.m_number.m);
+        } else if(this.m_number.m < 0){
+            external_text =string_format("少{0}个",this.m_number.m * -1);
         }
-        else if(this.m_number.m < 0){
-            question_des[3] = string_format("少{0}个\n",this.m_number.m);
-        }
+        const question_index = Math.floor(Math.random() * question_array.length);
 
-        const text = question_des.join(",");
+        const text = string_format(question_array[question_index]!,this.m_number.t,this.m_number.a,external_text)
         this.m_pipeline.make_text(text).attach_to(this).set_position(100,20)
     }
 }
@@ -432,35 +420,12 @@ class Question_9 extends QuestionView{
 
     private answer_0(){
 
-        this.m_pipeline.make_text("图画书").set_position();
-        this.m_pipeline.make_text("科技书").set_position();
-        this.m_pipeline.make_text("连环画").set_position();
+        //this.m_pipeline.make_text("图画书").set_position();
+        //this.m_pipeline.make_text("科技书").set_position();
+        //this.m_pipeline.make_text("连环画").set_position();
 
 
-        this.m_segment_initializers.push({
-            begin_point:{x:0,y:20},
-            scale : 3,
-            segments : [{
-                width: 100
-            }]
-        },{
-            begin_point:{x:0,y:20},
-            scale : 3,
-            segments : []
-        },{
-            begin_point:{x:this.m_number.x,y:20},
-            scale : 3,
-            segments : []
-        })
-        for(let i = 0 ;i < this.m_number.m ; ++i){
-            this.m_segment_initializers[1]?.segments.push({width : 100})
-        }
-        for(let i = 0 ;i < this.m_number.n ; ++i){
-            this.m_segment_initializers[2]?.segments.push({width : 100 * this.m_number.m});
-        }
-        this.m_pipeline.make_horiaontal_segment(this.m_segment_initializers[0]!).attach_to(this.analyze_panel).set_position(60,180).tag("answer.0.segment")
-        this.m_pipeline.make_horiaontal_segment(this.m_segment_initializers[1]!).attach_to(this.analyze_panel).set_position(60,180).tag("answer.1.segment")
-        this.m_pipeline.make_horiaontal_segment(this.m_segment_initializers[2]!).attach_to(this.analyze_panel).set_position(60,180).tag("answer.2.segment")
+        //
     
     }
     private answer_1(){
@@ -508,34 +473,34 @@ class Controller extends QuestionController{
         super();
         this.question_templates.push({
             template : Question_1,
-            title : "简单和倍",
+            title : "简单和倍 - 1",
         },{
             template : Question_2,
-            title : "简单和倍",
+            title : "简单和倍 - 2",
         },{
             template : Question_3,
-            title : "简单和倍",
+            title : "简单和倍 - 3",
         },{
             template : Question_4,
-            title : "简单和倍",
+            title : "简单和倍 - 4",
         },{
             template : Question_5,
-            title : "简单和倍",
+            title : "简单和倍 - 5",
         },{
             template : Question_6,
-            title : "简单和倍",
+            title : "简单和倍 - 6",
         },{
             template : Question_7,
-            title : "简单和倍",
+            title : "简单和倍 - 7",
         },{
             template : Question_8,
-            title : "简单和倍",
+            title : "简单和倍 - 8",
         },{
             template : Question_9,
-            title : "简单和倍",
+            title : "简单和倍 - 9",
         },{
             template : Question_10,
-            title : "简单和倍",
+            title : "简单和倍 - 10",
         });
     }
 };
