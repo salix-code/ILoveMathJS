@@ -135,12 +135,46 @@ class Question_1 extends QuestionView {
     }
 }
 
+class Question_2 extends QuestionView{
+    private m_number : {x : number,y : number,a:number} = {x : 0,y : 0,a:0}
+    private m_segment_initializer : HorizontalSegmentInitializer[] = []
+    constructor(){
+        super("")
+    }
+
+    public regenerate(): void {
+        const question_array = [
+            ""
+        ];
+
+
+        const question_index = Math.floor(Math.random() * question_array.length);
+
+        this.m_segment_initializer = [
+            {
+                begin_point : {x : 0,y : 0},
+                segments : []
+            },{
+                begin_point : {x : 0,y : 0},
+                segments : []
+            },
+        ]
+    }
+    private answer_0(){
+
+        
+    }
+}
+
 class Controller extends QuestionController{
     constructor() {
         super();
         this.question_templates.push({
             template : Question_1,
             title : "简单差倍 - 1",
+        },{
+            template : Question_2,
+            title : "简单差倍 - 2",
         });
     }
 };
