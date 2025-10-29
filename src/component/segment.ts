@@ -37,7 +37,7 @@ export const HorizontalSegmentOperator = {
     hide : function(index:number,options?:HorizontalSegmentInitializer){
         if(options){
             if(index >= 0 && index < options.segments.length){
-                options.segments[index].alpha = 0;
+                options.segments[index]!.alpha = 0;
             }
         }
     }
@@ -76,8 +76,11 @@ export class HorizontalSegment extends PIXI.Container{
         let color = "white";
         for(let segment of this.initializer.segments){
             color = segment.color ?? "white";
-            
-            if(segment.alpha && segment.alpha > 0){
+            let need_draw = true;
+            if(segment.alpha !== undefined && segment.alpha == 0){
+                need_draw = false
+            }
+            if(need_draw){
                 this.segment.moveTo(x, y - 10)
                 .lineTo(x,y)
                 .lineTo(x + segment.width * scale,y)
@@ -106,7 +109,16 @@ export class HorizontalSegment extends PIXI.Container{
             x = x + segment.width * scale;
             segment_index += 1
         }
-        this.segment.moveTo(x, y - 10).lineTo(x, y).stroke({color:color,width:1});
+
+        if(this.initializer.segments.length > 1){
+            this.segment.moveTo(x, y - 10).lineTo(x, y).stroke({color:color,width:1});
+        } else{
+            const segment = this.initializer.segments[0]!;
+            if(segment.alpha === undefined || segment.alpha > 0){
+                this.segment.moveTo(x, y - 10).lineTo(x, y).stroke({color:color,width:1});
+            }
+        }
+        
         
         if(this.initializer.length_tip){
             for(let item of this.initializer.length_tip){

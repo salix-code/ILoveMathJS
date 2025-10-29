@@ -4,6 +4,8 @@ import { Expression } from '../component/expression';
 import { Arrow, type ArrowInitializer } from '../component/arrow';
 import { Line } from '../component/line';
 import { HorizontalSegment, type HorizontalSegmentInitializer } from '../component/segment';
+import { QuestionGraph, type QuestionGraphConstructor } from '../component/questionngraph';
+import { VerticalListText, type VerticalListTextInitializer } from '../component/listtext';
 
 export interface PipelineContext{
     view:Map<string,Container>;
@@ -178,6 +180,12 @@ export class Pipeline{
         this.current = segment;
         return this;
     }
+    public make_vertical_text(initializer : VerticalListTextInitializer){
+        const result = new VerticalListText(initializer);
+
+        this.current = result;
+        return this;
+    }
 
     // public make_arrow(from:Container|string,target:Container|string,parent:Container){
     //     let from_label:Container;
@@ -238,6 +246,12 @@ export class Pipeline{
         
         this.create_arrow(initializer)
         parent.addChild(this.current!);
+        return this;
+    }
+
+    public make_question_graph(initializer:any){
+        let result = new QuestionGraph(initializer as QuestionGraphConstructor);
+        this.current  = result;
         return this;
     }
 
