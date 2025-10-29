@@ -173,3 +173,24 @@ export class QuestionGraph extends PIXI.Container{
         
     }
 }
+
+
+
+class QuestionView {
+    // 添加绘制大括号的方法
+    public make_brace(isLeft: boolean, x: number, y: number, height: number) {
+        const brace = new Graphics();
+        brace.lineStyle(3, 0x000000);
+
+        if (isLeft) {
+            brace.moveTo(x, y);
+            brace.bezierCurveTo(x - 20, y, x - 20, y + height / 2, x, y + height);
+        } else {
+            brace.moveTo(x, y);
+            brace.bezierCurveTo(x + 20, y, x + 20, y + height / 2, x, y + height);
+        }
+
+        this.addChild(brace);
+        return brace;
+    }
+}
