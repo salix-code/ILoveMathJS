@@ -7,6 +7,7 @@ export class QuestionView extends Container{
     protected answer_index : number = 0;
     protected draw_answer_function:((is_clear:boolean) => void)[] = [];
     protected m_pipeline : Pipeline = new Pipeline();
+    protected m_needRedrawTags : string[] = [];
     constructor(title:string){
         super()
         
@@ -41,6 +42,16 @@ export class QuestionView extends Container{
 
     }
 
+    public redraw(){
+        if(this.m_pipeline){
+            this.m_pipeline.redraw(...this.m_needRedrawTags);
+            this.m_needRedrawTags = []
+        }
+    }
+    protected requestUpdate(...tags:string[]){
+        this.m_needRedrawTags.push(...tags);
+    }
+
     
 };
 
@@ -58,7 +69,7 @@ export class QuestionController extends Container {
 
     constructor() {
         super();
-        window.addEventListener('keydown', this.onKeyDown);
+        
     }
     public start(){
         if(this.question_templates.length > 0){
@@ -121,7 +132,7 @@ export class QuestionController extends Container {
         }
     }
 
-    private onKeyDown = (e: KeyboardEvent) => {
+    public onKeyDown(e: KeyboardEvent){
         if (e.key === 'ArrowRight') {
             this.step_answer(1);
         } else if (e.key === 'ArrowLeft') {
@@ -133,6 +144,11 @@ export class QuestionController extends Container {
         }
         else if (e.key === '`'){
             this.regenerated();
+        }
+    }
+    public redraw(){
+        if(this.question){
+            this.question.redraw()
         }
     }
 }

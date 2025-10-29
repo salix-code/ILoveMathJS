@@ -4,6 +4,8 @@ import { APP_QuestionTable } from './question/table';
 import { AnimationSystem } from './class/anim';
 import { Arrow, type ArrowInitializer } from './component/arrow';
 import { Vector4 } from './maths/vector';
+import { FInputStack } from './class/inputstack';
+import type { QuestionController } from './class/Question';
 
 
 const app = new Application();
@@ -13,6 +15,7 @@ document.body.appendChild(app.view);
 
 let current_scene:number = 0;
 let selected_table_item_index:number = -1;
+let current_question_instance: QuestionController|null = null;
 
 type TableItem = {
     name : string,
@@ -119,39 +122,45 @@ function show_select_question(){
 
 
 function on_keydown(e:KeyboardEvent){
-    if(e.key == 'ArrowDown'){
-        if(selected_table_item_index + 1 < table_items.length){
-            select_table_item(selected_table_item_index + 1);
+    if(current_scene < 2){
+        if(e.key == 'ArrowDown'){
+            if(selected_table_item_index + 1 < table_items.length){
+                select_table_item(selected_table_item_index + 1);
+            }
+        }
+        else if(e.key == 'ArrowUp'){
+            if(selected_table_item_index - 1 >= 0){
+                select_table_item(selected_table_item_index - 1);
+            }
+        }
+        else if(e.key == 'Enter'){
+            if(current_scene == 0){
+                current_scene = 1;
+                scene.removeChildren();
+                show_select_question();
+            }
+            else if(current_scene == 1){
+                current_scene = 2;
+                scene.removeChildren();
+                show_selected_question()
+            }
         }
     }
-    else if(e.key == 'ArrowUp'){
-        if(selected_table_item_index - 1 >= 0){
-            select_table_item(selected_table_item_index - 1);
-        }
+    else{
+        FInputStack.getInstance().push(e)
     }
-    else if(e.key == 'Enter'){
-        if(current_scene == 0){
-            current_scene = 1;
-            scene.removeChildren();
-            show_select_question();
-        }
-        else if(current_scene == 1){
-            current_scene = 2;
-            scene.removeChildren();
-            show_selected_question()
-        }
-    }
+    
 }
 
 function show_selected_question(){
     app.stage.removeChildren();
 
-    window.removeEventListener('keydown',on_keydown);
+    //window.removeEventListener('keydown',on_keydown);
     const index = table_items[selected_table_item_index]!.index;
     const item = APP_QuestionTable.items[index]!;
-    const question_instance = item.creator();
-    app.stage.addChild(question_instance);
-    question_instance.start();
+    current_question_instance = item.creator();
+    app.stage.addChild(current_question_instance);
+    current_question_instance.start();
 }
 
 
@@ -163,7 +172,17 @@ show_select_category();
 const animation_system = AnimationSystem.getInstance();
 
 app.ticker.add(() => {
-    animation_system.tick(app.ticker.deltaTime / 10.0);
+    //animation_system.tick(app.ticker.deltaTime / 10.0);
+    const e = FInputStack.getInstance().pop();
+    if(e != null){
+        if(current_question_instance){
+            current_question_instance.onKeyDown(e)
+        }
+    }
+    if(current_question_instance){
+        current_question_instance.redraw();
+    }
+    
     
 });
 

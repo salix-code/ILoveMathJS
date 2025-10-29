@@ -2,7 +2,7 @@
 
 export class FInputStack{
     private static instance: FInputStack;
-    private inputStack : string[] = [];
+    private inputStack : KeyboardEvent[] = [];
     private inputIndex : number = 0;
     constructor(){
 
@@ -14,14 +14,14 @@ export class FInputStack{
         return FInputStack.instance;
     }
     
-    public push(keyname : string){
+    public push(keyname : KeyboardEvent){
         
         this.inputStack.push(keyname);
     }
 
-    public pop() : string{
+    public pop() : KeyboardEvent | null{
         if(this.inputIndex < 0 || this.inputIndex >= this.inputStack.length){
-            return ""
+            return null
         }
         const result = this.inputStack[this.inputIndex]!
         this.inputIndex += 1;

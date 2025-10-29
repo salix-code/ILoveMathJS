@@ -29,6 +29,8 @@ export type QuestionGraphConstructor = {
 }
 
 
+
+
 function drawDash(target:PIXI.Graphics, x1 : number, y1 : number, x2 : number, y2 :number, dashLength = 5, spaceLength = 5) {
   let x = x2 - x1;
   let y = y2 - y1;
@@ -166,5 +168,8 @@ export class QuestionGraph extends PIXI.Container{
             }
             this.m_text.splice(textIndex,this.m_text.length - textIndex);
         }
+    }
+    private drawCurlyBraces(){
+        
     }
 }
