@@ -183,7 +183,6 @@ app.ticker.add(() => {
         current_question_instance.redraw();
     }
     
-    
 });
 
 app.stage.addChild(scene);

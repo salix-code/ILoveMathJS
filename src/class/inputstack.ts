@@ -15,7 +15,6 @@ export class FInputStack{
     }
     
     public push(keyname : KeyboardEvent){
-        
         this.inputStack.push(keyname);
     }
 
@@ -25,8 +24,10 @@ export class FInputStack{
         }
         const result = this.inputStack[this.inputIndex]!
         this.inputIndex += 1;
+        
         if(this.inputIndex >= this.inputStack.length){
             this.inputStack = [];
+            this.inputIndex = 0;
         }
         return result;
     }

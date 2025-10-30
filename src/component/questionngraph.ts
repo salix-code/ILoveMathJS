@@ -22,11 +22,23 @@ export type TextDesc = {
     fontSize? : number
 }
 
+export type CurlyBracesDesc = {
+    x1 : number,
+    y1 : number,
+    x2 : number,
+    y2 : number,
+    height : number,
+    text ? :string,
+}
+
 export type QuestionGraphConstructor = {
     segment : SegmentDesc[]
     ellipse? : EllipseDesc[]
     text? : TextDesc[],
+    curly? : CurlyBracesDesc[],
 }
+
+
 
 
 
@@ -79,6 +91,7 @@ export class QuestionGraph extends PIXI.Container{
     private redraw(){
         this.graph.clear();
         
+        this.drawCurlyBraces();
         
         this.draw_segment();
         this.draw_ellipse();
@@ -170,27 +183,40 @@ export class QuestionGraph extends PIXI.Container{
         }
     }
     private drawCurlyBraces(){
-        
-    }
-}
-
-
-
-class QuestionView {
-    // 添加绘制大括号的方法
-    public make_brace(isLeft: boolean, x: number, y: number, height: number) {
-        const brace = new Graphics();
-        brace.lineStyle(3, 0x000000);
-
-        if (isLeft) {
-            brace.moveTo(x, y);
-            brace.bezierCurveTo(x - 20, y, x - 20, y + height / 2, x, y + height);
-        } else {
-            brace.moveTo(x, y);
-            brace.bezierCurveTo(x + 20, y, x + 20, y + height / 2, x, y + height);
+        if(this.initializer == null){
+            return;
         }
+        if(this.initializer.curly == undefined){
+            return
+        }
+        
+        for(let curly of this.initializer.curly){
+            
+            if(curly.y1 == curly.y2){
+                const halfWidth = (curly.x2 - curly.x1) / 2;
+                const xOffset = Math.abs(curly.height) * 0.6;
+                this.graph.moveTo(curly.x1,curly.y1)
+                .lineTo(curly.x1 + xOffset,curly.y1 - curly.height)
+                .lineTo(curly.x1 + halfWidth - xOffset,curly.y1 - curly.height)
+                .lineTo(curly.x1 + halfWidth,curly.y1 - curly.height * 2)
+                .lineTo(curly.x1 + halfWidth + xOffset ,curly.y1 - curly.height)
+                .lineTo(curly.x2 - xOffset,curly.y1 - curly.height)
+                .lineTo(curly.x2,curly.y2)
+                .stroke({width:1,color:"yellow"});
 
-        this.addChild(brace);
-        return brace;
+                if(curly.text){
+                    const fontSize = 16;
+                    const style = new PIXI.TextStyle({ fill: 'white', fontSize: fontSize });
+                    const metrics = PIXI.CanvasTextMetrics.measureText("Hello, Pixi.js!", style);
+                    //console.log(`宽度: ${metrics.width}, 高度: ${metrics.height}`);
+                    
+                    const text = new PIXI.Text({style:style,text:curly.text});
+                    text.x = curly.x1 + halfWidth - metrics.width / 4
+                    text.y = curly.y1 - curly.height * 2 - 20;
+                    this.addChild(text)
+                }
+            }
+
+        }
     }
 }
