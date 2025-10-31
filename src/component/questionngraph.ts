@@ -4,6 +4,7 @@ export type SegmentDesc = {
     points : [number,number][],
     type ? : number,
     color ? : string,
+    dash ? : boolean,
 }
 
 export type EllipseDesc = {
@@ -29,6 +30,8 @@ export type CurlyBracesDesc = {
     y2 : number,
     height : number,
     text ? :string,
+    color?:string,
+    textColor? : string,
 }
 
 export type QuestionGraphConstructor = {
@@ -77,7 +80,8 @@ function drawDash(target:PIXI.Graphics, x1 : number, y1 : number, x2 : number, y
 export class QuestionGraph extends PIXI.Container{
     private initializer:QuestionGraphConstructor|null = null;
     private graph! : PIXI.Graphics;
-    private m_text : PIXI.Text[] = [];
+    private m_textPool : PIXI.Text[] = [];
+    private m_textIndex : number = 0;
 
     constructor(initializer:QuestionGraphConstructor){
         super();
@@ -91,11 +95,13 @@ export class QuestionGraph extends PIXI.Container{
     private redraw(){
         this.graph.clear();
         
-        this.drawCurlyBraces();
+        this.m_textIndex = 0;
         
         this.draw_segment();
+        this.drawCurlyBraces();
         this.draw_ellipse();
         this.draw_text();
+        this.clear_text_pool();
     }
     
     private draw_segment(){
@@ -111,23 +117,22 @@ export class QuestionGraph extends PIXI.Container{
             this.graph.moveTo(prevPoint[0],prevPoint[1])
             const type = segmentDesc.type??0;
             const color = segmentDesc.color??'white'
-            if(type == 0){
-                for(let i = 1 ; i < segmentDesc.points.length; ++i){
-                    const currentPoint = [segmentDesc.points[i]![0],segmentDesc.points[i]![1]];
+            
+            for(let i = 1 ; i < segmentDesc.points.length; ++i){
+                const currentPoint = [segmentDesc.points[i]![0],segmentDesc.points[i]![1]];
+                if(type == 0){
                     this.graph.lineTo(currentPoint[0]!,currentPoint[1]!);
                 }
-
-                this.graph.stroke({color:color,width:1})
-
+                else if(type == 1){
+                    drawDash(this.graph,prevPoint[0],prevPoint[1],currentPoint[0]!,currentPoint[1]!).stroke({color:color,width:1})
+                }
+            }
+            this.graph.stroke({color:color,width:1})
+            
+            const dash = segmentDesc.dash??false
+            if(dash){
                 for(let point of segmentDesc.points){
                     this.graph.circle(point[0],point[1],4).fill("white")
-                }
-                
-            }
-            else if (type == 1){
-                for(let i = 1 ; i < segmentDesc.points.length; ++i){
-                    const currentPoint = [segmentDesc.points[i]![0],segmentDesc.points[i]![1]];
-                    drawDash(this.graph,prevPoint[0],prevPoint[1],currentPoint[0]!,currentPoint[1]!).stroke({color:color,width:1})
                 }
             }
         
@@ -146,6 +151,27 @@ export class QuestionGraph extends PIXI.Container{
             this.graph.stroke({color:color,width:1})
         }
     }
+    private get_text_from_pool() : PIXI.Text{
+        let text : PIXI.Text | null = null;
+        if(this.m_textIndex >= 0 && this.m_textIndex < this.m_textPool.length){
+            text = this.m_textPool[this.m_textIndex]!
+        }
+        else{
+            text = new PIXI.Text();
+            this.addChild(text);
+            this.m_textPool.push(text);
+        }
+        this.m_textIndex += 1;
+        return text!;
+    }
+    private clear_text_pool(){
+        if (this.m_textIndex < this.m_textPool.length){
+            for(let  i = this.m_textIndex; i < this.m_textPool.length; ++i){
+                this.removeChild(this.m_textPool[i]!);
+            }
+            this.m_textPool.splice(this.m_textIndex,this.m_textPool.length - this.m_textIndex);
+        }
+    }
     private draw_text(){
         if(this.initializer == null){
             return;
@@ -153,33 +179,22 @@ export class QuestionGraph extends PIXI.Container{
         if(this.initializer.text == undefined){
             return
         }
-        let textIndex = 0
+        
         for(let item of this.initializer.text){
             const color = item.color ?? "white"
             const fontSize = item.fontSize??16;
-            let text : PIXI.Text | null = null;
-            if(textIndex >= 0 && textIndex < this.m_text.length){
-                text = this.m_text[textIndex]!
-            }
-            else{
-                text = new PIXI.Text();
-                this.m_text.push(text);
-            }
+            
             //const 
+            const text = this.get_text_from_pool();
+            text.text = item.text;
             text.style.fill = color
             text.style.fontSize = fontSize
             text.text = item.text
             text.x = item.x;
             text.y = item.y;
-            this.addChild(text)
-            textIndex += 1;
-        }
 
-        if (textIndex < this.m_text.length){
-            for(let  i = textIndex; i < this.m_text.length; ++i){
-                this.removeChild(this.m_text[i]!);
-            }
-            this.m_text.splice(textIndex,this.m_text.length - textIndex);
+            
+            
         }
     }
     private drawCurlyBraces(){
@@ -206,14 +221,21 @@ export class QuestionGraph extends PIXI.Container{
 
                 if(curly.text){
                     const fontSize = 16;
-                    const style = new PIXI.TextStyle({ fill: 'white', fontSize: fontSize });
-                    const metrics = PIXI.CanvasTextMetrics.measureText("Hello, Pixi.js!", style);
-                    //console.log(`宽度: ${metrics.width}, 高度: ${metrics.height}`);
+                    const textColor = curly.textColor ?? "white";
+                    const style = new PIXI.TextStyle({ fill: textColor, fontSize: fontSize });
+                    const metrics = PIXI.CanvasTextMetrics.measureText(curly.text, style);
                     
-                    const text = new PIXI.Text({style:style,text:curly.text});
+                    const text =  this.get_text_from_pool();
+                    text.text = curly.text;
+                    text.style = style
                     text.x = curly.x1 + halfWidth - metrics.width / 4
-                    text.y = curly.y1 - curly.height * 2 - 20;
-                    this.addChild(text)
+                    text.y = curly.y1 - curly.height * 2;
+                    if(curly.height > 0) {
+                        text.y -= 20;
+                    }
+                    else {
+                        text.y += 10
+                    }
                 }
             }
 

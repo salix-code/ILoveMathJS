@@ -146,6 +146,7 @@ class Question_2 extends QuestionView{
     private m_segment_width : number = 0;
     private m_first_segment_y : number = 80;
     private m_seconnd_segment_y : number = 200;
+    private m_begin_x : number = 0;
     private m_question: QuestionGraphConstructor = {} as QuestionGraphConstructor;
     private m_tip : VerticalListTextInitializer = {} as VerticalListTextInitializer;
     private analyze_panel:Container | null = null;
@@ -159,6 +160,7 @@ class Question_2 extends QuestionView{
             this.answer_2.bind(this),
             this.answer_3.bind(this),
             this.answer_4.bind(this),
+            this.answer_5.bind(this),
         ]
 
         this.regenerate();
@@ -178,13 +180,15 @@ class Question_2 extends QuestionView{
         this.m_number.y = Math.floor(Math.random() * 10 + this.m_number.a + 1);
         this.m_number.x = this.m_number.y * this.m_number.n - (this.m_number.n - 1) * this.m_number.a;
         
+        this.m_begin_x = Math.floor(this.m_segment_width * (this.m_number.y - this.m_number.a) / this.m_number.a) + 20
+
         this.m_segment_width = 100;
         if(this.m_number.n > 5) {
             this.m_segment_width = Math.floor(this.m_segment_width * (10 / this.m_number.n));
         }
 
         this.m_question = {
-            segment : [{points:[]},{points:[]}]
+            segment : [{points:[],dash : true},{points:[],dash : true}]
         } as QuestionGraphConstructor
 
         const question_index = Math.floor(Math.random() * question_array.length);
@@ -206,9 +210,7 @@ class Question_2 extends QuestionView{
         
     }
     private answer_0(){
-
-        const begin_x = Math.floor(this.m_segment_width * (this.m_number.y - this.m_number.a) / this.m_number.a) + 20
-
+        const begin_x = this.m_begin_x
         this.m_question.segment[0]!.points.push([begin_x,this.m_first_segment_y],[begin_x + this.m_segment_width,this.m_first_segment_y]);
         this.m_question.segment[1]!.points.push([begin_x,this.m_seconnd_segment_y])
         for(let i = 1; i < this.m_number.n + 1; ++i){
@@ -217,57 +219,85 @@ class Question_2 extends QuestionView{
 
         this.m_question.curly = [{
                 x1 : begin_x,
-                y1:this.m_first_segment_y - 6,
+                y1:this.m_first_segment_y - 12,
                 x2 : begin_x + this.m_segment_width,
-                y2 : this.m_first_segment_y - 6,
+                y2 : this.m_first_segment_y - 12,
                 text : "1份",
                 height : 8
             },{
                 x1 : begin_x,
-                y1:this.m_seconnd_segment_y + 6,
+                y1:this.m_seconnd_segment_y - 12,
                 x2 : this.m_question.segment[1]!.points[this.m_number.n]![0],
-                y2 : this.m_seconnd_segment_y + 6,
+                y2 : this.m_seconnd_segment_y - 12,
                 text : string_format("{0}份",this.m_number.n),
-                height : -8
+                height : 8
             }
         ];
-        // this.m_question.text = [{
-        //     x : begin_x,
-        //     y : 70,
-        //     text : string_format("画出比例关系==> 1 比 {0}",this.m_number.n)
-        // }];
-
+        
         this.m_tip = {items : [{text:string_format("画出比例关系==> 1 比 {0}",this.m_number.n)}]};
 
         this.m_pipeline.make_question_graph(this.m_question).attach_to(this.analyze_panel).set_position(10,10).tag("question_graph");
 
-        this.m_pipeline.make_vertical_text(this.m_tip).attach_to(this.tip_panel).set_position(0,0).tag("tip_vertical")
+        this.m_pipeline.make_vertical_text(this.m_tip).attach_to(this.tip_panel).set_position(0,30).tag("tip_vertical")
     }
     private answer_1(){
+     // const begin_x = this.m_begin_x
+        const points = this.m_question.segment[1]?.points!;
+
+        this.m_question.curly!.push({
+                x1 : points[1]![0],
+                y1: points[1]![1] + 12,
+                x2 : points[points.length - 1]![0],
+                y2 : points[1]![1] + 12,
+                text : string_format("多{0}份",this.m_number.n - 1),
+                height : -8
+        });
+
+        this.requestUpdate("question_graph");
+
+    }
+    private answer_2(){
+
+        this.m_question.segment[0]!.points.splice(0,0,[20,this.m_first_segment_y])
+        this.m_question.segment[1]!.points.splice(0,0,[20,this.m_seconnd_segment_y])
+
+        this.m_tip.items.push({text:string_format("补上去掉的数量")})
+        this.requestUpdate("question_graph","tip_vertical");
+
+        DelayManager.getInstance().create().delay(()=>{
+            const curly = this.m_question.curly!;
+
+            curly[0]!.x1 = 20
+            curly[1]!.x1 = 20
+
+            curly[0]!.text = string_format("{0}",this.m_number.x);
+            curly[1]!.text = string_format("{0}",this.m_number.x);
+
+            this.requestUpdate("question_graph");
+
+        },30);
+        
+    }
+    private answer_3(){
+        //const width = Math.floor(this.m_segment_width * (this.m_number.y - this.m_number.a) / this.m_number.a)
+
         const point_1 = this.m_question.segment[0]!.points[0]
         const point_2 = this.m_question.segment[1]!.points[0]
-        const point_3 = this.m_question.segment[0]!.points[1]
-        const point_4 = this.m_question.segment[1]!.points[1]
+        const point_3 = this.m_question.segment[0]!.points[2]!
+        const point_4 = this.m_question.segment[1]!.points[2]!
+
 
         this.m_question.segment.push(
-            {points : [point_1!,point_2!],color:'red',type : 1}
-            ,{points : [point_3!,point_4!],color:'red',type : 1}
+            {points : [[point_3[0],point_3[1] - 30],[point_4[0],point_4[1] + 30]],color:'red',type : 1,dash : false}
         );
 
         //this.m_question.text![0]!.text = "="
         //this.m_question.text![0]!.x = (point_1![0] + point_3![0]) / 2
 
         this.requestUpdate("question_graph","tip_vertical");
+        
     }
-    private answer_2(){
-        //const width = Math.floor(this.m_segment_width * (this.m_number.y - this.m_number.a) / this.m_number.a)
-
-        this.m_question.segment[0]!.points.splice(0,0,[20,20])
-        this.m_question.segment[1]!.points.splice(0,0,[20,120])
-
-        this.requestUpdate("question_graph");
-    }
-    private answer_3(){
+    private answer_4(){
         const point_1 = this.m_question.segment[0]!.points[0];
         const point_2 = this.m_question.segment[1]!.points[0];
 
@@ -280,7 +310,7 @@ class Question_2 extends QuestionView{
         this.requestUpdate("question_graph");
     }
 
-    private answer_4(){
+    private answer_5(){
         const point_1 = this.m_question.segment[1]!.points[2];
         const point_2 = this.m_question.segment[1]!.points[this.m_number.n + 1];
         this.m_question.ellipse = [{
