@@ -15,7 +15,7 @@ export class QuestionView extends Container{
     
     public clean(){
         this.answer_index = 0;
-        const childrenToRemove = this.children.filter(child => child.label != "title");
+        const childrenToRemove = this.children.filter(child => child.label != "dontclean");
         for (const child of childrenToRemove) {
             this.removeChild(child);
         }
@@ -84,7 +84,7 @@ export class QuestionController extends Container {
         this.title_label.text = title
         this.title_label.x = 300;
         this.title_label.y = 10;
-        this.title_label.label = "title";
+        this.title_label.label = "dontclean";
         this.addChild(this.title_label)
     }
     private step_question(direction : number){
