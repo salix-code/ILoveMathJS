@@ -1,9 +1,45 @@
+import * as PIXI from 'pixi.js';
 import { QuestionController, QuestionView } from "../class/Question";
 import type { QuestionTableItem } from "../class/table_item";
+//import { RenderSystem } from '../actions/rendersystem';
 
 class MathView extends QuestionView{
+    protected m_textPanel: PIXI.Container | null = null;
+    protected m_graphics : PIXI.Graphics | null = null;
+    //protected m_render : RenderSystem | null = null;
     constructor(){
         super("")
+
+        this.m_textPanel = new PIXI.Container();
+        this.m_textPanel.x = 100;
+        this.m_textPanel.y = 160;
+        this.m_textPanel.label = "dontclean"
+        this.addChild(this.m_textPanel);
+
+        this.m_graphics = new PIXI.Graphics();
+        this.m_graphics.x = 100;
+        this.m_graphics.y = 160;
+        this.m_graphics.label = "dontclean"
+        this.addChild(this.m_graphics);
+    }
+    public clean(): void {
+        super.clean();
+        if(this.m_graphics){
+            this.m_graphics.clear();
+        }
+        if(this.m_textPanel){
+            this.m_textPanel.removeChildren();
+        }
+    }
+
+    public redraw(){
+
+    }
+    public requestUpdate(tag:string){
+        if(tag == "graph"){
+            
+
+        }
     }
 }
 
