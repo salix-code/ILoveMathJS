@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { QuestionController, QuestionView } from "../class/Question";
 import type { QuestionTableItem } from "../class/table_item";
-import { SegmentRender, TextRender, type SegmentRenderItem, type TextRenderItem } from '../actions/rendersystem';
+import { SegmentRender, TextRender, type TextRenderItem } from '../actions/rendersystem';
 import { CircleDefinition, CircleRender } from '../actions/circlesystem';
 import { CurlyDefinition, CurlyRender } from '../actions/curlyrender';
 //import { RenderSystem } from '../actions/rendersystem';
@@ -175,7 +175,7 @@ class Question_1 extends MathView {
         const left = this.m_number.x + this.m_number.y;
 
         this.m_circle.RemoveLength(left, this.m_circle.Array().length - left);
-        const begin_x = 30 + (this.m_number.x + this.m_number.y) * 40 + 60;
+        const begin_x = 30 + (this.m_number.x + this.m_number.y) * 40 + 50;
 
         for (let i = 0; i < Math.max(this.m_number.x / 2, m); ++i) {
             this.m_circle.Add({

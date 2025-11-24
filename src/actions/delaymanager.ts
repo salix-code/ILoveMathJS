@@ -3,7 +3,7 @@ import { Ticker } from 'pixi.js';
 
 export interface DelayTask{
     process : ((loop_counter:number)=>void) | null;
-    seconds : number;
+    milliseconds : number;
     remind : number;
     loop : number;
     loop_counter : number;
@@ -19,7 +19,7 @@ export class DelayPipeline {
 
     }
     public delay(func:(loop_counter:number)=>void,seconds:number = 0,loop:number = 1){
-        this.m_tasks.push({process:func,seconds:seconds,remind:seconds,loop:loop,loop_counter : 0});
+        this.m_tasks.push({process:func,milliseconds:seconds *1000,remind:seconds * 1000,loop:loop,loop_counter : 0});
         return this;
     }
     private onStart(){
@@ -51,7 +51,7 @@ export class DelayPipeline {
                 task.loop -= 1;
                 task.loop_counter += 1;
                 if(task.loop > 0){
-                    task.remind += task.seconds;
+                    task.remind += task.milliseconds;
                 }else{
                     this.m_index += 1;
                     check_finish = true;
@@ -71,11 +71,11 @@ export class DelayPipeline {
 }
 
 export class DelayManager {
-    private static instance: DelayManager;
+    
     private m_delay_pipeline :DelayPipeline[] = [];
 
     private m_tick : ((ticker:Ticker) => void) | null = null;
-
+    private static instance: DelayManager;
     public static getInstance(): DelayManager {
         if (!DelayManager.instance) {
             DelayManager.instance = new DelayManager();
@@ -98,7 +98,7 @@ export class DelayManager {
     private tick(ticker:Ticker){
         
         for(let item of this.m_delay_pipeline){
-            item.tick(ticker.deltaTime);
+            item.tick(ticker.elapsedMS);
         }
         for(let i = this.m_delay_pipeline.length - 1; i >= 0; --i){
             const item = this.m_delay_pipeline[i]!

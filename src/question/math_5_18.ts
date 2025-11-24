@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { QuestionController, QuestionView } from "../class/Question";
 import type { QuestionTableItem } from "../class/table_item";
-import { RectDefinition, RectRender, SegmentRender, TextRender, type SegmentRenderItem, type TextRenderItem } from '../actions/rendersystem';
+import { RectDefinition, RectRender, SegmentData, SegmentRender, TextRender, type SegmentDefinition, type TextRenderItem } from '../actions/rendersystem';
 //import { RenderSystem } from '../actions/rendersystem';
 
 function string_format(str: string, ...args: any[]) {
@@ -82,7 +82,7 @@ class MathViewWithData extends MathView {
     private m_segmentRender: SegmentRender | null = null;
     private m_rectReder: RectRender | null = null;
     protected m_textItem: TextRenderItem[] = [];
-    protected m_segmentItem: SegmentRenderItem | null = null;
+    protected m_segment: SegmentData | null = null;
     //private m_rectData: RectDefinition | null = null;
     protected m_rectData: RectDefinitionFactory = new RectDefinitionFactory();
     constructor() {
@@ -91,9 +91,9 @@ class MathViewWithData extends MathView {
         if (this.m_textPanel) {
             this.m_textRender = new TextRender(this.m_textPanel, this.m_textItem)
         }
-        this.m_segmentItem = { lines: [], dashs: [] };
-        if (this.m_graphics && this.m_segmentItem) {
-            this.m_segmentRender = new SegmentRender(this.m_graphics, this.m_segmentItem)
+        this.m_segment = new SegmentData();
+        if (this.m_graphics && this.m_segment) {
+            this.m_segmentRender = new SegmentRender(this.m_segment,this);
         }
         if (this.m_graphics) {
             //this.m_rectData = new RectDefinition();
@@ -143,9 +143,9 @@ class MathViewWithData extends MathView {
                     break;
 
                 } else if (c == '=') {
-                    this.m_segmentItem?.lines.push({
-                        x1: beginX - 40, y1: offsetY - 15, x2: beginX + maxLen * colWidth, y2: offsetY - 15, color: 'white'
-                    });
+                    // this.m_segmentItem?.lines.push({
+                    //     x1: beginX - 40, y1: offsetY - 15, x2: beginX + maxLen * colWidth, y2: offsetY - 15, color: 'white'
+                    // });
                     offsetY -= rowHeight;
                     break;
                     
@@ -180,17 +180,17 @@ class Question_1 extends MathView {
     private m_textRender: TextRender | null = null;
     private m_segmentRender: SegmentRender | null = null
     private m_textItem: TextRenderItem[] = [];
-    private m_segmentItem: SegmentRenderItem | null = null;
+    private m_segmentItem: SegmentDefinition | null = null;
     constructor() {
         super();
 
         if (this.m_textPanel) {
             this.m_textRender = new TextRender(this.m_textPanel, this.m_textItem)
         }
-        this.m_segmentItem = { lines: [], dashs: [] };
-        if (this.m_graphics && this.m_segmentItem) {
-            this.m_segmentRender = new SegmentRender(this.m_graphics, this.m_segmentItem)
-        }
+        // this.m_segmentItem = { lines: [], dashs: [] };
+        // if (this.m_graphics && this.m_segmentItem) {
+        //     this.m_segmentRender = new SegmentRender(this.m_segmentItem,this)
+        // }
         this.regenerate();
     }
     public regenerate(): void {
@@ -238,13 +238,13 @@ class Question_1 extends MathView {
             pos += 60
         }
 
-        if (this.m_segmentItem && this.m_segmentRender) {
-            this.m_segmentItem?.lines.push({
-                x1: 120, y1: 180, x2: 520, y2: 180, color: 'white'
-            });
-            this.m_segmentRender.redraw()
+        // if (this.m_segmentItem && this.m_segmentRender) {
+        //     this.m_segmentItem?.lines.push({
+        //         x1: 120, y1: 180, x2: 520, y2: 180, color: 'white'
+        //     });
+        //     this.m_segmentRender.redraw()
 
-        }
+        // }
 
 
         this.m_textRender.redraw();

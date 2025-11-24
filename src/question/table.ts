@@ -10,6 +10,7 @@ import { APP_Math_5_13 } from './math_5_13';
 import { APP_Math_5_14 } from './math_5_14';
 import { APP_Math_5_18 } from './math_5_18';
 import { APP_Math_5_15 } from './math_5_15';
+import { APP_Math_5_16 } from './math_5_16';
 
 export interface QuestionTable {
     items: QuestionTableItem[];
@@ -17,6 +18,6 @@ export interface QuestionTable {
 
 export const APP_QuestionTable: QuestionTable = {
     items: [
-        APP_Math_3_4, APP_Math_3_6, APP_Math_5_10, APP_Math_5_13,APP_Math_5_14,APP_Math_5_15, APP_Math_5_18,
+        APP_Math_3_4, APP_Math_3_6, APP_Math_5_10, APP_Math_5_13,APP_Math_5_14,APP_Math_5_16, APP_Math_5_18,
     ]
 }

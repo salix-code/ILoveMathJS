@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 
+
 export class BaseRender {
     protected m_container: PIXI.Container;
     protected m_graphics: PIXI.Graphics;
@@ -13,6 +14,12 @@ export class BaseRender {
         this.m_graphics.y = y;
         this.m_graphics.label = "dontclean";
         this.m_container.addChild(this.m_graphics);
+    }
+    public Create(){
+
+    }
+    public Bind(){
+        
     }
 
     protected get_text_from_pool(): PIXI.Text {
@@ -31,4 +38,6 @@ export class BaseRender {
         this.m_textIndex += 1;
         return text!;
     }
+
+    public redraw(){}
 }

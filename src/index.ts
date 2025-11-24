@@ -6,6 +6,7 @@ import { Arrow, type ArrowInitializer } from './component/arrow';
 import { Vector4 } from './maths/vector';
 import { FInputStack } from './class/inputstack';
 import type { QuestionController } from './class/Question';
+import { FTaskManager } from './manager/taskmanager';
 
 
 const app = new Application();
@@ -173,6 +174,7 @@ const animation_system = AnimationSystem.getInstance();
 
 app.ticker.add(() => {
     //animation_system.tick(app.ticker.deltaTime / 10.0);
+
     const e = FInputStack.getInstance().pop();
     if(e != null){
         if(current_question_instance){
@@ -182,7 +184,8 @@ app.ticker.add(() => {
     if(current_question_instance){
         current_question_instance.redraw();
     }
-    
+    //app.ticker.FPS;
+    FTaskManager.getInstance().Tick(app.ticker.elapsedMS)
 });
 
 app.stage.addChild(scene);

@@ -1,5 +1,6 @@
 import { Container, Graphics, Text,Point, NineSliceSpriteGpuData } from 'pixi.js';
 import { Pipeline } from '../actions/pipeline';
+import type { BaseRender } from '../actions/basesystem';
 
 
 
@@ -8,8 +9,16 @@ export class QuestionView extends Container{
     protected draw_answer_function:((is_clear:boolean) => void)[] = [];
     protected m_pipeline : Pipeline = new Pipeline();
     protected m_needRedrawTags : string[] = [];
+    private m_renders : BaseRender[] = [];
     constructor(title:string){
         super()
+        
+    }
+
+    protected RegisterRender(render : BaseRender){
+        this.m_renders.push(render);
+    }
+    public Tick(){
         
     }
     
@@ -46,6 +55,10 @@ export class QuestionView extends Container{
         if(this.m_pipeline){
             this.m_pipeline.redraw(...this.m_needRedrawTags);
             this.m_needRedrawTags = []
+        }
+
+        for(let render of this.m_renders){
+            render.redraw();
         }
     }
     protected requestUpdate(...tags:string[]){
