@@ -22,6 +22,9 @@ class AnimalDefinition {
     public Get(idx:number) : AnimalItemDefinition | undefined{
         return this.items[idx];
     }
+    public Num() : number{
+        return this.items.length;
+    }
     public Last() : AnimalItemDefinition | undefined{
         return this.items[this.items.length - 1];
     }
@@ -44,6 +47,12 @@ class AnimalDefinition {
             func(item);
         }
     }
+    public ForEach(beginIdx:number,endIdx : number,func : (item : AnimalItemDefinition)=>void){
+        for(let i = beginIdx; i < endIdx && i < this.items.length; ++i){
+            func(this.items[i]!)
+        }
+        this.bRedraw = true;
+    }
     public FindFootPosition(idx:number,foot : number) : [number,number]{
         const item = this.items[idx];
         if(item){
@@ -53,6 +62,9 @@ class AnimalDefinition {
             return [x + foot * 24,item.y + 40];
         }
         return [0,0];
+    }
+    public CalcWidth(footNum : number):number {
+        return 16 * footNum + 8 * (footNum - 1);
     }
     public NeedRedraw(){
         const v = this.bRedraw;
@@ -81,7 +93,7 @@ class AnimalSystem extends BaseRender {
 
         for (let item of this.m_data.Array()) {
             const color = item.color ?? "white";
-            const width = 16 * item.foot + 8 * (item.foot - 1);
+            const width = this.m_data.CalcWidth(item.foot)
             let x = item.x - width / 2;
             const y = item.y + 40;
             for(let i = 0; i < item.foot; ++i){

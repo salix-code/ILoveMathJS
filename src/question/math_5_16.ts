@@ -149,15 +149,13 @@ class Question_1 extends BaseView {
         const eIndex = this.m_number.c;
         this.m_curly.RemoveAt(2);
 
-        const footPosition = this.m_animal.FindFootPosition(eIndex,0);
-        if (footPosition) {
-            this.m_foot.Add({
-                x: footPosition[0],
-                y: footPosition[1],
-                w: 16,
-                h: 16
-            });
-        }
+        const animal = this.m_animal.Get(sIndex);
+        const oldWidth = this.m_animal.CalcWidth(animal!.foot);
+        const newWidth = this.m_animal.CalcWidth(this.m_number.e);
+
+        this.m_animal.ForEach(sIndex,this.m_animal.Num(),(item)=>{
+            item.x += (newWidth - oldWidth)
+        });
 
         
 
