@@ -1,6 +1,7 @@
 import { AnimalDefinition, AnimalSystem } from "../actions/animalsystem";
 import { CurlyDefinition, CurlyRender } from "../actions/curlyrender";
 import { DelayManager } from "../actions/delaymanager";
+import { RectDefinition, RectSystem } from "../actions/rectsystem";
 import { QuestionController, QuestionView } from "../class/Question";
 import type { QuestionTableItem } from "../class/table_item";
 import { FTaskManager } from "../manager/taskmanager";
@@ -24,12 +25,14 @@ class Question_1 extends BaseView {
 
     private m_number: { a: number, b: number, c: number, d: number,e : number } = { a: 0, b: 0, c: 16, d: 44,e:4 }
     private m_animal: AnimalDefinition;
+    private m_foot : RectDefinition;
     private m_curly: CurlyDefinition;
     private m_name : string[] = [];
     constructor() {
         super()
         this.m_animal = new AnimalDefinition();
         this.m_curly = new CurlyDefinition();
+        this.m_foot = new RectDefinition();
         this.draw_answer_function.push(
             this.answer_0.bind(this),
             this.answer_1.bind(this),
@@ -80,6 +83,7 @@ class Question_1 extends BaseView {
 
         this.RegisterRender(new AnimalSystem(this.m_animal, this, 100, 160));
         this.RegisterRender(new CurlyRender(this.m_curly, this, 100, 160));
+        this.RegisterRender(new RectSystem(this.m_foot, this, 100, 160));
     }
 
     private answer_0() {
@@ -116,9 +120,7 @@ class Question_1 extends BaseView {
 
     private answer_2() {
 
-
         const count = this.m_number.c;
-
         DelayManager.getInstance().create()
             .delay((index: number) => {
                 this.m_animal.Apply(index + count, (item) => {
@@ -142,9 +144,27 @@ class Question_1 extends BaseView {
     }
     private answer_3() {
         const count = this.m_number.d / 2 - this.m_number.c;
+        
         const sIndex = this.m_number.a;
         const eIndex = this.m_number.c;
         this.m_curly.RemoveAt(2);
+
+        const footPosition = this.m_animal.FindFootPosition(eIndex,0);
+        if (footPosition) {
+            this.m_foot.Add({
+                x: footPosition[0],
+                y: footPosition[1],
+                w: 16,
+                h: 16
+            });
+        }
+
+        
+
+        FTaskManager.getInstance().Lerp1(0,1,1,(percent)=>{
+            this.m_animal.FindFootPosition(sIndex,0);
+            
+        });
 
         let originX: number[] = [];
         for (let i = 0; i < count; ++i) {
@@ -160,20 +180,22 @@ class Question_1 extends BaseView {
         const targetAnimal = this.m_animal.Get(this.m_number.c - 1);
         const targetAnimalX = targetAnimal?.x;
 
-        FTaskManager.getInstance().Lerp1(0, count * 60, 1.0, (offset: number) => {
+        FTaskManager.getInstance().Lerp1(0, count * 60 - 40, 1.0, (offset: number) => {
             for (let i = 0; i < count; ++i) {
                 this.m_animal.Apply(eIndex + i, (animal) => {
                     animal.x = originX[i]! - offset
                 });
             }
         }).Finish(() => {
+            this.m_animal.RemoveAt(this.m_number.c, this.m_number.b);
+
             for (let i = 0; i < count; ++i) {
                 this.m_animal.Apply(sIndex + i, (animal) => {
                     animal.foot = 4;
                     animal.color = "#FFA500"
                 });
             }
-            this.m_animal.RemoveAt(this.m_number.c, this.m_number.b);
+            
 
         });
 

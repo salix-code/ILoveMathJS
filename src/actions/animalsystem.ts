@@ -44,6 +44,16 @@ class AnimalDefinition {
             func(item);
         }
     }
+    public FindFootPosition(idx:number,foot : number) : [number,number]{
+        const item = this.items[idx];
+        if(item){
+            const width = 16 * item.foot + 8 * (item.foot - 1);
+            let x = item.x - width / 2;
+
+            return [x + foot * 24,item.y + 40];
+        }
+        return [0,0];
+    }
     public NeedRedraw(){
         const v = this.bRedraw;
         this.bRedraw = false;
@@ -75,7 +85,7 @@ class AnimalSystem extends BaseRender {
             let x = item.x - width / 2;
             const y = item.y + 40;
             for(let i = 0; i < item.foot; ++i){
-                this.m_graphics.rect(x,item.y + 40,16,16);
+                this.m_graphics.rect(x,item.y + 40,16,16).fill({color:color});
                 this.m_graphics.moveTo(x + 8,item.y + 40).lineTo(item.x,item.y).stroke({color:color})
                 x += 24;
             }
