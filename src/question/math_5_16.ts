@@ -20,6 +20,20 @@ class BaseView extends QuestionView {
     }
 }
 
+class FAnimalProxy{
+    private m_animal: AnimalDefinition;
+    constructor(data:AnimalDefinition){
+        this.m_animal = data;
+    }
+    public Make(startX: number,y : number,n:number,foot : number) {
+        const width =  16 * foot + 8 * (foot - 1);
+        for(let i = 0; i < n; ++i){
+
+        }
+    }
+    
+}
+
 
 class Question_1 extends BaseView {
 
@@ -88,34 +102,43 @@ class Question_1 extends BaseView {
 
     private answer_0() {
         const count = Math.floor(this.m_number.d / 2);
-
+        const width = this.m_animal.CalcWidth(this.m_number.e);
         for (let i = 0; i < count; ++i) {
             this.m_animal.Add({
-                x: 20 + i * 60,
+                x: i * (width + 20),
                 y: 160,
                 r: 20,
                 foot: 2
             });
         }
+        const leftAnimal = this.m_animal.Get(0);
+        const rightAnimal = this.m_animal.Get(count - 1);
+        if (leftAnimal && rightAnimal) {
+            this.m_curly.Add({
+                x1: leftAnimal.x,
+                y1: leftAnimal.y + 60,
+                x2: rightAnimal.x,
+                y2: leftAnimal.y + 60,
+                height: -12,
+                text: string_format("全部按{0}算，一共有{1} / 2 = {2}", this.m_name[0], this.m_number.d, count)
+            });
+        }
 
-        this.m_curly.Add({
-            x1: 20,
-            y1: 160 + 60,
-            x2: 20 + (this.m_number.d / 2) * 60 - 60,
-            y2: 160 + 60,
-            height: -12,
-            text: string_format("全部按{0}算，一共有{1} / 2 = {2}", this.m_name[0], this.m_number.d, count)
-        });
     }
     private answer_1() {
-        this.m_curly.Add({
-            x1: 20,
-            y1: 160 - 40,
-            x2: 20 + (this.m_number.c) * 60 - 60,
-            y2: 160 - 40,
-            height: 12,
-            text: string_format("按頭算的話，一共有{0}", this.m_number.c)
-        });
+        const leftAnimal = this.m_animal.Get(0);
+        const rightAnimal = this.m_animal.Get(this.m_number.c - 1);
+        if (leftAnimal && rightAnimal) {
+            this.m_curly.Add({
+                x1: leftAnimal.x,
+                y1: leftAnimal.y - 40,
+                x2: rightAnimal.x,
+                y2: leftAnimal.y - 40,
+                height: 12,
+                text: string_format("按頭算的話，一共有{0}", this.m_number.c)
+            });
+        }
+
     }
 
     private answer_2() {
@@ -129,30 +152,29 @@ class Question_1 extends BaseView {
             }, 0.2, count);
 
         const lastAnimal = this.m_animal.Last();
-        if (!lastAnimal) {
-            return;
+        
+        const leftAnimal = this.m_animal.Get(this.m_number.c);
+        if (leftAnimal && lastAnimal) {
+            this.m_curly.Add({
+                x1: leftAnimal.x,
+                y1: leftAnimal.y - 40,
+                x2: lastAnimal.x,
+                y2: lastAnimal.y - 40,
+                height: 12,
+                text: string_format("多了{0}", this.m_number.b),
+                color: "red"
+            });
         }
-        this.m_curly.Add({
-            x1: 20 + (this.m_number.c) * 60,
-            y1: 160 - 40,
-            x2: lastAnimal.x,
-            y2: 160 - 40,
-            height: 12,
-            text: string_format("多了{0}", this.m_number.b),
-            color: "red"
-        });
+
     }
     private answer_3() {
         const eIndex = this.m_number.c;
         const sIndex = 0;
-
-        const footCount = Math.floor(2 / (this.m_number.e - 2) + 0.01);
-
         this.m_curly.Apply(0, (item) => {
             item.y1 += 60
             item.y2 += 60;
         });
-        
+
         const leftAnim = this.m_animal.Get(sIndex);
         const rightAnim = this.m_animal.Get(eIndex);
 
@@ -171,23 +193,38 @@ class Question_1 extends BaseView {
     }
 
     private answer_4() {
-
-        this.m_animal.ForEach(1,this.m_number.c,(item1,idx)=>{
-            const origin = item1.x;
-            FTaskManager.getInstance().Lerp1(origin,origin + 60,0.6,(x)=>{
-                this.m_animal.Apply(idx,(item)=>{
-                    item.x = x
-                })
-                
-            });
-        })
-
+        
+        this.m_animal.ForEach(0,2 / (this.m_number.e - 2), (item) => {
+            item.foot = this.m_number.e;
+        });
     }
 
     private answer_5() {
-        this.m_animal.Apply(0,(item)=>{
+        const idxScale = 2 / (this.m_number.e - 2);
+        const beginIdx = idxScale;
+        const endIdx = (this.m_number.d / 2 - this.m_number.c - 1) * idxScale;
+        this.m_animal.ForEach(beginIdx,endIdx, (item) => {
             item.foot = this.m_number.e;
-        })
+        });
+    }
+    private answer_6(){
+        const createCurly = (leftIdx : number,rightIdx : number)=>{
+            const leftAnimal = this.m_animal.Get(leftIdx);
+            const rightAnimal = this.m_animal.Get(rightIdx);
+            if(leftAnimal && rightAnimal){
+                this.m_curly.Add({
+                    x1: leftAnimal.x,
+                    y1: leftAnimal.y,
+                    x2: rightAnimal.x,
+                    y2: rightAnimal.y,
+                    height: 0
+                })
+            }
+        }
+
+        createCurly(0,this.m_number.b);
+        createCurly(this.m_number.b,this.m_number.c);
+        
     }
 }
 
