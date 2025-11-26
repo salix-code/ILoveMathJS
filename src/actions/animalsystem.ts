@@ -47,9 +47,9 @@ class AnimalDefinition {
             func(item);
         }
     }
-    public ForEach(beginIdx:number,endIdx : number,func : (item : AnimalItemDefinition)=>void){
+    public ForEach(beginIdx:number,endIdx : number,func : (item : AnimalItemDefinition,idx:number)=>void){
         for(let i = beginIdx; i < endIdx && i < this.items.length; ++i){
-            func(this.items[i]!)
+            func(this.items[i]!,i)
         }
         this.bRedraw = true;
     }
@@ -71,6 +71,7 @@ class AnimalDefinition {
         this.bRedraw = false;
         return v;
     }
+    
 
 }
 

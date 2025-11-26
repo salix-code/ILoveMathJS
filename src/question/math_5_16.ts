@@ -23,11 +23,11 @@ class BaseView extends QuestionView {
 
 class Question_1 extends BaseView {
 
-    private m_number: { a: number, b: number, c: number, d: number,e : number } = { a: 0, b: 0, c: 16, d: 44,e:4 }
+    private m_number: { a: number, b: number, c: number, d: number, e: number } = { a: 0, b: 0, c: 16, d: 44, e: 4 }
     private m_animal: AnimalDefinition;
-    private m_foot : RectDefinition;
+    private m_foot: RectDefinition;
     private m_curly: CurlyDefinition;
-    private m_name : string[] = [];
+    private m_name: string[] = [];
     constructor() {
         super()
         this.m_animal = new AnimalDefinition();
@@ -56,21 +56,21 @@ class Question_1 extends BaseView {
         ];
         this.m_number.a = Math.floor(Math.random() * 6 + 4);
         this.m_number.b = Math.floor(Math.random() * (this.m_number.a / 2) + 2)
-        
-        
+
+
         const question_index = Math.floor(Math.random() * question_array.length);
         if (question_index == 0) {
             this.m_number.e = 4;
-            this.m_name.push("雞","兔子");
+            this.m_name.push("雞", "兔子");
         }
-        else if(question_index == 1) {
+        else if (question_index == 1) {
             this.m_number.e = Math.floor(Math.random() + 0.5) + 3;
-            this.m_name.push("乙","甲")
-        } else if(question_index == 2){
+            this.m_name.push("乙", "甲")
+        } else if (question_index == 2) {
             this.m_number.e = 3;
         }
         this.m_number.d = 2 * this.m_number.a + this.m_number.b * this.m_number.e;
-        if(this.m_number.d % 2 == 1){
+        if (this.m_number.d % 2 == 1) {
             this.m_number.a -= 1;
             this.m_number.b += 1;
             this.m_number.d = 2 * this.m_number.a + this.m_number.b * this.m_number.e;
@@ -88,11 +88,11 @@ class Question_1 extends BaseView {
 
     private answer_0() {
         const count = Math.floor(this.m_number.d / 2);
-       
+
         for (let i = 0; i < count; ++i) {
             this.m_animal.Add({
                 x: 20 + i * 60,
-                y: 200,
+                y: 160,
                 r: 20,
                 foot: 2
             });
@@ -100,19 +100,19 @@ class Question_1 extends BaseView {
 
         this.m_curly.Add({
             x1: 20,
-            y1: 200 + 60,
+            y1: 160 + 60,
             x2: 20 + (this.m_number.d / 2) * 60 - 60,
-            y2: 200 + 60,
+            y2: 160 + 60,
             height: -12,
-            text: string_format("全部按{0}算，一共有{1} / 2 = {2}",this.m_name[0],this.m_number.d, count)
+            text: string_format("全部按{0}算，一共有{1} / 2 = {2}", this.m_name[0], this.m_number.d, count)
         });
     }
     private answer_1() {
         this.m_curly.Add({
             x1: 20,
-            y1: 200 - 40,
+            y1: 160 - 40,
             x2: 20 + (this.m_number.c) * 60 - 60,
-            y2: 200 - 40,
+            y2: 160 - 40,
             height: 12,
             text: string_format("按頭算的話，一共有{0}", this.m_number.c)
         });
@@ -134,126 +134,60 @@ class Question_1 extends BaseView {
         }
         this.m_curly.Add({
             x1: 20 + (this.m_number.c) * 60,
-            y1: 100 - 40,
+            y1: 160 - 40,
             x2: lastAnimal.x,
-            y2: 100 - 40,
+            y2: 160 - 40,
             height: 12,
             text: string_format("多了{0}", this.m_number.b),
             color: "red"
         });
     }
     private answer_3() {
-        const count = this.m_number.d / 2 - this.m_number.c;
-        
-        const sIndex = this.m_number.a;
         const eIndex = this.m_number.c;
-        this.m_curly.RemoveAt(2);
+        const sIndex = 0;
 
-        const animal = this.m_animal.Get(sIndex);
-        const oldWidth = this.m_animal.CalcWidth(animal!.foot);
-        const newWidth = this.m_animal.CalcWidth(this.m_number.e);
+        const footCount = Math.floor(2 / (this.m_number.e - 2) + 0.01);
 
-        this.m_animal.ForEach(sIndex,this.m_animal.Num(),(item)=>{
-            item.x += (newWidth - oldWidth)
+        this.m_curly.Apply(0, (item) => {
+            item.y1 += 60
+            item.y2 += 60;
         });
-
         
+        const leftAnim = this.m_animal.Get(sIndex);
+        const rightAnim = this.m_animal.Get(eIndex);
 
-        FTaskManager.getInstance().Lerp1(0,1,1,(percent)=>{
-            this.m_animal.FindFootPosition(sIndex,0);
-            
-        });
-
-        let originX: number[] = [];
-        for (let i = 0; i < count; ++i) {
-            let animal = this.m_animal.Get(eIndex + i);
-            if (animal) {
-                originX.push(animal.x)
-            }
+        if (leftAnim && rightAnim) {
+            const leftX = leftAnim.x;
+            const rightX = rightAnim.x;
+            const leftY = leftAnim.y + 60;
+            const rightY = rightAnim.y;
+            FTaskManager.getInstance().Lerp2([rightX, rightY], [leftX, leftY], 1, ([x, y]) => {
+                this.m_animal.Apply(eIndex, (item) => {
+                    item.x = x!;
+                    item.y = y!;
+                });
+            });
         }
-
-        const lastAnim = this.m_animal.Last();
-        const lastAnimalX = lastAnim?.x;
-
-        const targetAnimal = this.m_animal.Get(this.m_number.c - 1);
-        const targetAnimalX = targetAnimal?.x;
-
-        FTaskManager.getInstance().Lerp1(0, count * 60 - 40, 1.0, (offset: number) => {
-            for (let i = 0; i < count; ++i) {
-                this.m_animal.Apply(eIndex + i, (animal) => {
-                    animal.x = originX[i]! - offset
-                });
-            }
-        }).Finish(() => {
-            this.m_animal.RemoveAt(this.m_number.c, this.m_number.b);
-
-            for (let i = 0; i < count; ++i) {
-                this.m_animal.Apply(sIndex + i, (animal) => {
-                    animal.foot = 4;
-                    animal.color = "#FFA500"
-                });
-            }
-            
-
-        });
-
-
-        FTaskManager.getInstance().Lerp1(lastAnimalX!, targetAnimalX!, 1.0, (x) => {
-            this.m_curly.Apply(0, (item) => {
-                item.x2 = x;
-            })
-        });
-
-        this.m_curly.Apply(0,(item) =>{
-            item.text = string_format("腿的数量还是：{0} / 2 = {1}",this.m_number.d,this.m_number.d / 2);
-        })
     }
 
     private answer_4() {
 
-        const firstAnimal = this.m_animal.Get(this.m_number.c - 1);
-        const lastAnimal = this.m_animal.Get(this.m_number.a - 1);
-        if (firstAnimal && lastAnimal) {
-            FTaskManager.getInstance().Lerp1(firstAnimal.x, lastAnimal.x, 0.5, (x) => {
-                this.m_curly.Apply(1, (curly) => {
-                    curly.x2 = x;
-                });
-            }).Finish(() => {
-                this.m_curly.Apply(1, (curly) => {
-                    curly.text = string_format("鸡有{0}", this.m_number.a);
+        this.m_animal.ForEach(1,this.m_number.c,(item1,idx)=>{
+            const origin = item1.x;
+            FTaskManager.getInstance().Lerp1(origin,origin + 60,0.6,(x)=>{
+                this.m_animal.Apply(idx,(item)=>{
+                    item.x = x
                 })
+                
             });
-        }
-
-        
-
+        })
 
     }
 
     private answer_5() {
-        const x: number[] = [];
-        let anim = this.m_animal.Get(this.m_number.a);
-        if (anim) {
-            x.push(anim.x)
-        }
-        anim = this.m_animal.Get(this.m_number.c - 1);
-        if (anim) {
-            x.push(anim.x)
-        }
-        if (x.length == 2) {
-            this.m_curly.Add({
-                x1: x[0]!,
-                y1: 100 - 40,
-                x2: x[1]!,
-                y2: 100 - 40,
-                height: 8,
-                text: string_format("兔子{0}", this.m_number.b)
-            })
-        }
-
-        
-
-
+        this.m_animal.Apply(0,(item)=>{
+            item.foot = this.m_number.e;
+        })
     }
 }
 
@@ -400,8 +334,8 @@ class Question_2 extends BaseView {
             })
         });
 
-        this.m_curly.Apply(0,(item) =>{
-            item.text = string_format("腿的数量还是：{0} / 2 = {1}",this.m_number.d,this.m_number.d / 2);
+        this.m_curly.Apply(0, (item) => {
+            item.text = string_format("腿的数量还是：{0} / 2 = {1}", this.m_number.d, this.m_number.d / 2);
         })
     }
 
@@ -421,7 +355,7 @@ class Question_2 extends BaseView {
             });
         }
 
-        
+
 
 
     }
@@ -447,7 +381,7 @@ class Question_2 extends BaseView {
             })
         }
 
-        
+
 
 
     }
