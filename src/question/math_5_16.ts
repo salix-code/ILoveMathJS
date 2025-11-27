@@ -1,3 +1,4 @@
+import { Circle } from "pixi.js";
 import { AnimalDefinition, AnimalSystem } from "../actions/animalsystem";
 import { CurlyDefinition, CurlyRender } from "../actions/curlyrender";
 import { DelayManager } from "../actions/delaymanager";
@@ -20,20 +21,6 @@ class BaseView extends QuestionView {
     }
 }
 
-class FAnimalProxy{
-    private m_animal: AnimalDefinition;
-    constructor(data:AnimalDefinition){
-        this.m_animal = data;
-    }
-    public Make(startX: number,y : number,n:number,foot : number) {
-        const width =  16 * foot + 8 * (foot - 1);
-        for(let i = 0; i < n; ++i){
-
-        }
-    }
-    
-}
-
 
 class Question_1 extends BaseView {
 
@@ -54,6 +41,7 @@ class Question_1 extends BaseView {
             this.answer_3.bind(this),
             this.answer_4.bind(this),
             this.answer_5.bind(this),
+            this.answer_6.bind(this),
         );
 
         this.regenerate();
@@ -66,43 +54,26 @@ class Question_1 extends BaseView {
 
         const question_array = [
             "田田家她家的雞與兔子，數頭有{0}個，數腿有{1}條，請問雞與兔子各有多少個？",
-            "有甲乙兩種戲票一共{0}張，一共用去{1}元，其中甲每張3元，乙每張2元，問兩種票各多少張"
         ];
         this.m_number.a = Math.floor(Math.random() * 6 + 4);
         this.m_number.b = Math.floor(Math.random() * (this.m_number.a / 2) + 2)
-
-
-        const question_index = Math.floor(Math.random() * question_array.length);
-        if (question_index == 0) {
-            this.m_number.e = 4;
-            this.m_name.push("雞", "兔子");
-        }
-        else if (question_index == 1) {
-            this.m_number.e = Math.floor(Math.random() + 0.5) + 3;
-            this.m_name.push("乙", "甲")
-        } else if (question_index == 2) {
-            this.m_number.e = 3;
-        }
+        this.m_name.push("雞", "兔子");
+        this.m_number.e = 4;
         this.m_number.d = 2 * this.m_number.a + this.m_number.b * this.m_number.e;
-        if (this.m_number.d % 2 == 1) {
-            this.m_number.a -= 1;
-            this.m_number.b += 1;
-            this.m_number.d = 2 * this.m_number.a + this.m_number.b * this.m_number.e;
-        }
         this.m_number.c = this.m_number.a + this.m_number.b;
-
+        const question_index = Math.floor(Math.random() * question_array.length);
         const question_text = string_format(question_array[question_index]!, this.m_number.c, this.m_number.d);
         this.m_pipeline.make_text(question_text).attach_to(this).set_position(100, 80);
         this.m_pipeline.make_horiaontal_line(0, 0, 1024).set_position(80, 160).attach_to(this);
 
         this.RegisterRender(new AnimalSystem(this.m_animal, this, 100, 160));
         this.RegisterRender(new CurlyRender(this.m_curly, this, 100, 160));
-        this.RegisterRender(new RectSystem(this.m_foot, this, 100, 160));
+        
     }
 
     private answer_0() {
         const count = Math.floor(this.m_number.d / 2);
-        const width = this.m_animal.CalcWidth(this.m_number.e);
+        const width = this.m_animal.CalcWidth(2);
         for (let i = 0; i < count; ++i) {
             this.m_animal.Add({
                 x: i * (width + 20),
@@ -138,7 +109,6 @@ class Question_1 extends BaseView {
                 text: string_format("按頭算的話，一共有{0}", this.m_number.c)
             });
         }
-
     }
 
     private answer_2() {
@@ -152,7 +122,7 @@ class Question_1 extends BaseView {
             }, 0.2, count);
 
         const lastAnimal = this.m_animal.Last();
-        
+
         const leftAnimal = this.m_animal.Get(this.m_number.c);
         if (leftAnimal && lastAnimal) {
             this.m_curly.Add({
@@ -168,11 +138,11 @@ class Question_1 extends BaseView {
 
     }
     private answer_3() {
-        const eIndex = this.m_number.c;
+        const eIndex = this.m_number.d / 2 - 1;
         const sIndex = 0;
         this.m_curly.Apply(0, (item) => {
-            item.y1 += 60
-            item.y2 += 60;
+            item.y1 += 70
+            item.y2 += 70;
         });
 
         const leftAnim = this.m_animal.Get(sIndex);
@@ -193,25 +163,34 @@ class Question_1 extends BaseView {
     }
 
     private answer_4() {
-        
-        this.m_animal.ForEach(0,2 / (this.m_number.e - 2), (item) => {
+        const idxScale = 2 / (this.m_number.e - 2);
+        const lastIdx = this.m_number.d / 2 - 1;
+        this.m_animal.ForEach(0, idxScale, (item) => {
             item.foot = this.m_number.e;
         });
+
+        this.m_animal.RemoveAt(lastIdx);
+        this.m_curly.RemoveAt(2);
     }
 
     private answer_5() {
         const idxScale = 2 / (this.m_number.e - 2);
-        const beginIdx = idxScale;
-        const endIdx = (this.m_number.d / 2 - this.m_number.c - 1) * idxScale;
-        this.m_animal.ForEach(beginIdx,endIdx, (item) => {
+        const startIdx = idxScale;
+        const count = this.m_number.d / 2 - this.m_number.c - 1
+        const eIdx = count * idxScale + 1;
+
+        this.m_animal.ForEach(startIdx, eIdx, (item) => {
             item.foot = this.m_number.e;
         });
+
+        this.m_animal.RemoveAt(this.m_number.c,count);
+
     }
-    private answer_6(){
-        const createCurly = (leftIdx : number,rightIdx : number)=>{
+    private answer_6() {
+        const createCurly = (leftIdx: number, rightIdx: number) => {
             const leftAnimal = this.m_animal.Get(leftIdx);
             const rightAnimal = this.m_animal.Get(rightIdx);
-            if(leftAnimal && rightAnimal){
+            if (leftAnimal && rightAnimal) {
                 this.m_curly.Add({
                     x1: leftAnimal.x,
                     y1: leftAnimal.y,
@@ -222,9 +201,9 @@ class Question_1 extends BaseView {
             }
         }
 
-        createCurly(0,this.m_number.b);
-        createCurly(this.m_number.b,this.m_number.c);
-        
+        createCurly(0, this.m_number.b);
+        createCurly(this.m_number.b, this.m_number.c);
+
     }
 }
 
