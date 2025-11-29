@@ -61,9 +61,9 @@ class AnimalDefinition {
 
             const xIdx = foot % 2;
 
-            const yIdx= Math.floor((foot + 0.01) / 2) * 40;
+            const yIdx= Math.floor(foot / 2 + 1) * 40 + item.y;
             
-            return [x[xIdx]!,yIdx + 80]
+            return [x[xIdx]!,yIdx]
 
         }
         return [0, 0];

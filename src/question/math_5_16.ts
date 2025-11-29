@@ -25,7 +25,7 @@ class BaseView extends QuestionView {
 
 class Question_1 extends BaseView {
 
-    private m_number: { a: number, b: number, c: number, d: number, e: number } = { a: 0, b: 0, c: 16, d: 44, e: 4 }
+    private m_number: { a: number, b: number, c: number, d: number, x: number, y: number } = { a: 0, b: 0, c: 16, d: 44, x: 2, y: 4 }
     private m_animal: AnimalDefinition;
     private m_foot: RectDefinition;
     private m_curly: CurlyDefinition;
@@ -60,8 +60,8 @@ class Question_1 extends BaseView {
         this.m_number.a = Math.floor(Math.random() * 6 + 4);
         this.m_number.b = Math.floor(Math.random() * (this.m_number.a / 2) + 2)
         this.m_name.push("雞", "兔子");
-        this.m_number.e = 4;
-        this.m_number.d = 2 * this.m_number.a + this.m_number.b * this.m_number.e;
+
+        this.m_number.d = 2 * this.m_number.a + this.m_number.b * this.m_number.y;
         this.m_number.c = this.m_number.a + this.m_number.b;
         const question_index = Math.floor(Math.random() * question_array.length);
         const question_text = string_format(question_array[question_index]!, this.m_number.c, this.m_number.d);
@@ -143,52 +143,64 @@ class Question_1 extends BaseView {
 
     }
     private answer_3() {
-        const eIndex = this.m_number.d / 2 - 1;
-        const sIndex = 0;
+        let eIndex = this.m_number.d / this.m_number.x - 1;
+        let sIndex = 0;
         this.m_curly.Apply(0, (item) => {
             item.y1 += 70
             item.y2 += 70;
         });
 
-        const leftAnim = this.m_animal.Get(sIndex);
-        const rightAnim = this.m_animal.Get(eIndex);
+        let needFoot = this.m_number.y - this.m_number.x;
+        const beginPoints: number[] = [];
+        const endPoints: number[] = [];
 
-
-        if (leftAnim && rightAnim) {
-            const [rightX, rightY] = this.m_animal.FindFootPosition(eIndex, 0);
-            const [leftX, leftY] = this.m_animal.FindFootPosition(sIndex, 2);
-
+        while (needFoot > 0) {
+            for (let i = this.m_number.x; i > 0; i--) {
+                let pos = this.m_animal.FindFootPosition(eIndex, i - 1);
+                beginPoints.concat(pos)
+                needFoot -= 1
+                this.m_animal.Apply(eIndex, (item) => {
+                    item.foot -= 1;
+                });
+                if (needFoot <= 0) {
+                    break
+                }
+            }
+            eIndex -= 1;
+        }
+        needFoot = this.m_number.y - this.m_number.x;
+        while (needFoot > 0) {
+            for (let i = 0; i < this.m_number.y - this.m_number.x; ++i) {
+                let pos = this.m_animal.FindFootPosition(sIndex, i);
+                endPoints.concat(pos)
+                needFoot -= 1
+                if (needFoot <= 0) {
+                    break
+                }
+            }
+            sIndex += 1;
+        }
+        needFoot = this.m_number.y - this.m_number.x;
+        for (let i = 0; i < needFoot; i += 2) {
             this.m_foot.Add({
-                x: rightX,
-                y: rightY,
+                x: beginPoints[i]!,
+                y: beginPoints[i + 1]!,
                 w: 16,
                 h: 16,
                 color: 'yellow'
-            });
-
-            FTaskManager.getInstance().Lerp2([rightX, rightY], [leftX, leftY], 1, ([x, y]) => {
-                this.m_foot.Apply(0, (item) => {
-                    //item.x = x!;
-                    //item.y = y!;
-                });
-            }).Finish(()=>{
-                this.m_animal.Apply(eIndex,(item)=>{
-                    item.foot -= 1;
-                });
-            });
+            })
         }
-        // if (leftAnim && rightAnim) {
-        //     const leftX = leftAnim.x;
-        //     const rightX = rightAnim.x;
-        //     const leftY = leftAnim.y + 60;
-        //     const rightY = rightAnim.y;
-        //     FTaskManager.getInstance().Lerp2([rightX, rightY], [leftX, leftY], 1, ([x, y]) => {
-        //         this.m_animal.Apply(eIndex, (item) => {
-        //             item.x = x!;
-        //             item.y = y!;
-        //         });
-        //     });
-        // }
+
+        FTaskManager.getInstance().Lerp2(beginPoints, endPoints, 1, ([x, y]) => {
+            this.m_foot.Range(0,needFoot, (item) => {
+                item.x = x!;
+                item.y = y!;
+            });
+        }).Finish(() => {
+            this.m_animal.Apply(eIndex, (item) => {
+                item.foot -= 1;
+            });
+        });
     }
 
     private answer_4() {
