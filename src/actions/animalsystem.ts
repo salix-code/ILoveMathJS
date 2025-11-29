@@ -56,10 +56,15 @@ class AnimalDefinition {
     public FindFootPosition(idx: number, foot: number): [number, number] {
         const item = this.items[idx];
         if (item) {
-            const width = 16 * item.foot + 8 * (item.foot - 1);
-            let x = item.x - width / 2;
+            const width = 16 * 2 + 8 * (2 - 1);
+            const x = [item.x - width / 2, item.x - width / 2 + 24];
 
-            return [x + foot * 24, item.y + 40];
+            const xIdx = foot % 2;
+
+            const yIdx= Math.floor((foot + 0.01) / 2) * 40;
+            
+            return [x[xIdx]!,yIdx + 80]
+
         }
         return [0, 0];
     }

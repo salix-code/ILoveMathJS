@@ -6,6 +6,7 @@ import { RectDefinition, RectSystem } from "../actions/rectsystem";
 import { QuestionController, QuestionView } from "../class/Question";
 import type { QuestionTableItem } from "../class/table_item";
 import { FTaskManager } from "../manager/taskmanager";
+import { RectRender } from "../actions/rendersystem";
 
 function string_format(str: string, ...args: any[]) {
     return str.replace(/{(\d+)}/g, (match, index) => String(args[index]));
@@ -29,6 +30,7 @@ class Question_1 extends BaseView {
     private m_foot: RectDefinition;
     private m_curly: CurlyDefinition;
     private m_name: string[] = [];
+
     constructor() {
         super()
         this.m_animal = new AnimalDefinition();
@@ -68,7 +70,8 @@ class Question_1 extends BaseView {
 
         this.RegisterRender(new AnimalSystem(this.m_animal, this, 100, 160));
         this.RegisterRender(new CurlyRender(this.m_curly, this, 100, 160));
-        
+        this.RegisterRender(new RectSystem(this.m_foot, this, 100, 160));
+
     }
 
     private answer_0() {
@@ -109,6 +112,8 @@ class Question_1 extends BaseView {
                 text: string_format("按頭算的話，一共有{0}", this.m_number.c)
             });
         }
+
+        return true;
     }
 
     private answer_2() {
@@ -148,18 +153,42 @@ class Question_1 extends BaseView {
         const leftAnim = this.m_animal.Get(sIndex);
         const rightAnim = this.m_animal.Get(eIndex);
 
+
         if (leftAnim && rightAnim) {
-            const leftX = leftAnim.x;
-            const rightX = rightAnim.x;
-            const leftY = leftAnim.y + 60;
-            const rightY = rightAnim.y;
+            const [rightX, rightY] = this.m_animal.FindFootPosition(eIndex, 0);
+            const [leftX, leftY] = this.m_animal.FindFootPosition(sIndex, 2);
+
+            this.m_foot.Add({
+                x: rightX,
+                y: rightY,
+                w: 16,
+                h: 16,
+                color: 'yellow'
+            });
+
             FTaskManager.getInstance().Lerp2([rightX, rightY], [leftX, leftY], 1, ([x, y]) => {
-                this.m_animal.Apply(eIndex, (item) => {
-                    item.x = x!;
-                    item.y = y!;
+                this.m_foot.Apply(0, (item) => {
+                    //item.x = x!;
+                    //item.y = y!;
+                });
+            }).Finish(()=>{
+                this.m_animal.Apply(eIndex,(item)=>{
+                    item.foot -= 1;
                 });
             });
         }
+        // if (leftAnim && rightAnim) {
+        //     const leftX = leftAnim.x;
+        //     const rightX = rightAnim.x;
+        //     const leftY = leftAnim.y + 60;
+        //     const rightY = rightAnim.y;
+        //     FTaskManager.getInstance().Lerp2([rightX, rightY], [leftX, leftY], 1, ([x, y]) => {
+        //         this.m_animal.Apply(eIndex, (item) => {
+        //             item.x = x!;
+        //             item.y = y!;
+        //         });
+        //     });
+        // }
     }
 
     private answer_4() {
@@ -183,7 +212,7 @@ class Question_1 extends BaseView {
             item.foot = this.m_number.e;
         });
 
-        this.m_animal.RemoveAt(this.m_number.c,count);
+        this.m_animal.RemoveAt(this.m_number.c, count);
 
     }
     private answer_6() {
