@@ -98,6 +98,9 @@ class AnimalSystem extends BaseRender {
         this.m_graphics.clear();
 
         for (let item of this.m_data.Array()) {
+            if(item.foot == 0){
+                continue;
+            }
             const color = item.color ?? "white";
             const width = 16 * 2 + 8 * (2 - 1);
             const x = [item.x - width / 2, item.x - width / 2 + 24];
@@ -110,7 +113,7 @@ class AnimalSystem extends BaseRender {
             y += 40;
             let count = 0;
             while(footIdx < item.foot){
-                const xIdx = 1 - footIdx % 2;
+                const xIdx = footIdx % 2;
                 this.m_graphics.rect(x[xIdx]!, y, 16, 16).fill({ color: color });
                 this.m_graphics.moveTo(x[xIdx]! + 8, y).lineTo(x[xIdx]!+8,y - 24).stroke({ color: color });
                 count += 1;
