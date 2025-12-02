@@ -108,14 +108,14 @@ class AnimalSystem extends BaseRender {
             let footIdx = 0;
             this.m_graphics.rect(x[0]!, y, 16, 16).fill({ color: color });
             this.m_graphics.rect(x[1]!, y, 16, 16).fill({ color: color });
-            this.m_graphics.moveTo(x[0]! + 8, y).lineTo(item.x, item.y).lineTo(x[1]!+8,y).stroke({ color: color })
+            this.m_graphics.moveTo(x[0]! + 8, y).lineTo(item.x, item.y).lineTo(x[1]!+8,y).stroke({ color: "white" })
             footIdx += 2;
             y += 40;
             let count = 0;
             while(footIdx < item.foot){
                 const xIdx = footIdx % 2;
                 this.m_graphics.rect(x[xIdx]!, y, 16, 16).fill({ color: color });
-                this.m_graphics.moveTo(x[xIdx]! + 8, y).lineTo(x[xIdx]!+8,y - 24).stroke({ color: color });
+                this.m_graphics.moveTo(x[xIdx]! + 8, y).lineTo(x[xIdx]!+8,y - 24).stroke({ color: "white" });
                 count += 1;
                 if(count == 2){
                     y += 40;

@@ -6,7 +6,7 @@ import { RectDefinition, RectSystem } from "../actions/rectsystem";
 import { QuestionController, QuestionView } from "../class/Question";
 import type { QuestionTableItem } from "../class/table_item";
 import { FTaskManager } from "../manager/taskmanager";
-import { RectRender } from "../actions/rendersystem";
+import { RectRender, TextRender } from "../actions/rendersystem";
 
 function string_format(str: string, ...args: any[]) {
     return str.replace(/{(\d+)}/g, (match, index) => String(args[index]));
@@ -49,7 +49,7 @@ class Question_1 extends BaseView {
         this.RegisterRender(new AnimalSystem(this.m_animal, this, 100, 160));
         this.RegisterRender(new CurlyRender(this.m_curly, this, 100, 160));
         this.RegisterRender(new RectSystem(this.m_foot, this, 100, 160));
-
+        
         this.regenerate();
     }
     public regenerate(): void {
@@ -96,7 +96,7 @@ class Question_1 extends BaseView {
 
             for (let i = 0; i < this.m_number.z; ++i) {
                 this.m_foot.Add({
-                    x: lastFoot[0] + 20 + i * 40,
+                    x: lastFoot[0] + 40 + i * 40,
                     y: lastFoot[1],
                     w: 16,
                     h: 16
@@ -156,14 +156,16 @@ class Question_1 extends BaseView {
         const lastAnimal = this.m_animal.Last();
 
         const leftAnimal = this.m_animal.Get(this.m_number.c);
+        
+        const num = (this.m_number.d / this.m_number.x - this.m_number.c) * this.m_number.x;
         if (leftAnimal && lastAnimal) {
             this.m_curly.Add({
                 x1: leftAnimal.x,
                 y1: leftAnimal.y - 40,
-                x2: lastAnimal.x,
+                x2: lastAnimal.x + this.m_number.z * 40,
                 y2: lastAnimal.y - 40,
                 height: 12,
-                text: string_format("多了{0}", this.m_number.b),
+                text: string_format("多了{0} = {1} - {2} x {3}", num,this.m_number.d ,this.m_number.c ,this.m_number.x),
                 color: "red"
             });
         }
@@ -286,8 +288,10 @@ class Question_1 extends BaseView {
 
         this.m_animal.RemoveAt(this.m_number.c, count);
         this.m_foot.Empty();
-        this.m_curly.RemoveAt(2);
-
+        //this.m_curly.RemoveAt(2);
+        this.m_curly.Apply(2,(item)=>{
+            item.color = "gray";
+        })
         const scanCurly = (leftIdx: number, rightIdx: number) => {
             const leftAnimal = this.m_animal.Get(leftIdx);
             const rightAnimal = this.m_animal.Get(rightIdx);
@@ -316,8 +320,9 @@ class Question_1 extends BaseView {
             }
         }
 
-        createCurly(0, this.m_number.b - 1, string_format("{0} 有 {1}", this.m_name[1], this.m_number.b),);
-        createCurly(this.m_number.b, this.m_number.c - 1, string_format("{0} 有 {1}", this.m_name[0], this.m_number.a));
+        const num = (this.m_number.d / this.m_number.x - this.m_number.c) * this.m_number.x;
+        createCurly(0, this.m_number.b - 1, string_format("{0} 有 {1} = {2} / ({3} - {4})", this.m_name[1], this.m_number.b,num ,this.m_number.y,this.m_number.x));
+        createCurly(this.m_number.b, this.m_number.c - 1, string_format("{0} 有 {1} = {2} - {3}", this.m_name[0], this.m_number.a,this.m_number.c,this.m_number.b));
 
 
         this.m_curly.Apply(0, (item) => {
