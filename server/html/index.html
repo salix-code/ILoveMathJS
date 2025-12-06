@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>选择页面</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Arial','Microsoft YaHei',sans-serif;
+            background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            min-height:100vh; display:flex; justify-content:center; align-items:center;
+        }
+        .container {
+            background:white; padding:40px 60px; border-radius:15px;
+            box-shadow:0 10px 40px rgba(0,0,0,0.2); text-align:center; min-width:420px;
+        }
+        h1 { color:#333; margin-bottom:24px; font-size:24px; }
+        .select-wrapper { margin-bottom:20px; }
+        select {
+            width:100%; padding:12px 15px; font-size:16px; border:2px solid #ddd;
+            border-radius:8px; background:white; cursor:pointer; appearance:none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat:no-repeat; background-position:right 12px center; background-size:18px;
+            padding-right:44px;
+        }
+        button {
+            width:100%; padding:12px 14px; font-size:16px; font-weight:600; color:#fff;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); border:none; border-radius:8px;
+            cursor:pointer; box-shadow:0 6px 18px rgba(102,126,234,0.35);
+        }
+        button:disabled { background:#bbb; cursor:not-allowed; box-shadow:none; }
+        .note { margin-top:12px; font-size:13px; color:#666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>请选择题目类型</h1>
+        <div class="select-wrapper">
+            <select id="mySelect" aria-label="选择题目类型">
+                <option value="">-- 请选择 --</option>
+
+                <!-- 鸡兔同笼主类型，使用 data-subtype 指定不同生成逻辑 -->
+                <option value="math_5_16" data-subtype="type1">鸡兔同笼 — 简单</option>
+                <option value="math_5_16" data-subtype="type2">鸡兔同笼 — 中等</option>
+                <option value="math_5_16" data-subtype="type3">鸡兔同笼 — 变形一</option>
+                <option value="math_5_16" data-subtype="type4">鸡兔同笼 — 变形二</option>
+                <option value="math_5_16" data-subtype="type5">鸡兔同笼 — 变形三</option>
+
+                <!-- 其他题型示例 -->
+                <option value="option2" data-subtype="default">选项 2</option>
+                <option value="option3" data-subtype="default">选项 3</option>
+            </select>
+        </div>
+
+        <button id="confirmBtn" onclick="handleConfirm()" disabled>确定</button>
+        <div class="note">选择类型后，后台生成不同题目。</div>
+    </div>
+
+    <script>
+        const selectEl = document.getElementById('mySelect');
+        const btn = document.getElementById('confirmBtn');
+
+        selectEl.addEventListener('change', function () {
+            btn.disabled = !this.value;
+        });
+
+        selectEl.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && this.value) handleConfirm();
+        });
+
+        function handleConfirm() {
+            const selectedValue = selectEl.value; // 主类型，例如 math_5_16
+            if (!selectedValue) {
+                alert('请先选择一个选项！');
+                return;
+            }
+
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            const subtype = selectedOption.dataset.subtype || 'default';
+            const selectedText = selectedOption.text;
+
+            // 统一跳转到 /page，携带 type 与 subtype（后端根据 subtype 生成不同题目）
+            const params = new URLSearchParams({
+                type: selectedValue,
+                subtype: subtype,
+                title: selectedText,
+                
+                count: '5',
+                timestamp: Date.now().toString()
+            });
+
+            // 使用 /page 路由，后端 handlePageRequest 根据 type 与 subtype 决定渲染和题目生成
+            window.location.href = `/page?${params.toString()}`;
+        }
+    </script>
+</body>
+</html>
