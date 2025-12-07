@@ -7,6 +7,10 @@ import (
     "github.com/gin-gonic/gin"
 )
 
+type QuestionTemplate struct{
+}
+
+
 // GenerateMath516Questions 根据 subtype 生成不同变体的鸡兔同笼题目
 // subtype 示例： "type1","type2","type3" 等
 func GenerateMath516Questions(subtype string, count int) []interface{} {
@@ -29,21 +33,24 @@ func GenerateMath516Questions(subtype string, count int) []interface{} {
             questionText = fmt.Sprintf("已知鸡与兔共有 %d 个头，%d 条腿，问鸡、兔各多少只？", heads, legs)
 
         case "type2":
-            // 变式：给定头数和腿数但腿数比常规多出一个固定量（干扰项），需要去掉干扰
-            chicken = rand.Intn(6) + 3
-            rabbit = rand.Intn(5) + 2
+            chicken = rand.Intn(12) + 3
+            rabbit = rand.Intn(20) + 2
+            if rabbit % 2 == 1 {
+                rabbit += 1
+            }
             heads = chicken + rabbit
-            legs = 2*chicken + 4*rabbit + 2 // 多出 2 条腿的干扰
-            questionText = fmt.Sprintf("笼中有鸡和兔共 %d 个头，数到 %d 条腿（其中包含 2 条外来腿），问鸡与兔各多少只？", heads, legs)
+            legs = 2*chicken + 3*rabbit
+            questionText = fmt.Sprintf("已知三轮车和自行车两种车，一共有%d辆，轮子共有%d个，问三轮车和自行车各多少辆？", heads, legs)
 
         case "type3":
-            // 带干扰动物（例如还有若干只鸭，每只 2 条腿，但给出数量未知——这里简化为给出鸭数）
-            duck := rand.Intn(3) // 0-2 只鸭
-            chicken = rand.Intn(6) + 2
-            rabbit = rand.Intn(5) + 1
-            heads = chicken + rabbit + duck
-            legs = 2*chicken + 4*rabbit + 2*duck
-            questionText = fmt.Sprintf("某笼有鸡、兔、鸭共 %d 个头，数得 %d 条腿（含 %d 只鸭），问鸡与兔各多少只？", heads, legs, duck)
+            chicken = rand.Intn(12) + 3
+            rabbit = rand.Intn(20) + 2
+            if rabbit % 2 == 0 {
+                rabbit += 1
+            }
+            heads = chicken + rabbit
+            legs = 2*chicken + 3*rabbit
+            questionText = fmt.Sprintf("已知三轮车和自行车两种车，一共有%d辆，轮子共有%d个，问三轮车和自行车各多少辆？", heads, legs)
 
         case "type4":
             // 文字复杂表述（相同数值，但表述更复杂）
@@ -75,7 +82,7 @@ func GenerateMath516Questions(subtype string, count int) []interface{} {
             "content":     questionText,
             "type":        "鸡兔同笼",
             "subtype":     subtype,
-            "answerLines": 2,
+            "answerLines": 1,
             "answer": gin.H{
                 "chicken": chicken,
                 "rabbit":  rabbit,

@@ -16,7 +16,8 @@
             box-shadow:0 10px 40px rgba(0,0,0,0.2); text-align:center; min-width:420px;
         }
         h1 { color:#333; margin-bottom:24px; font-size:24px; }
-        .select-wrapper { margin-bottom:20px; }
+        .select-row { display:flex; gap:12px; align-items:center; margin-bottom:20px; }
+        .select-wrapper { flex:1; }
         select {
             width:100%; padding:12px 15px; font-size:16px; border:2px solid #ddd;
             border-radius:8px; background:white; cursor:pointer; appearance:none;
@@ -36,61 +37,111 @@
 <body>
     <div class="container">
         <h1>请选择题目类型</h1>
-        <div class="select-wrapper">
-            <select id="mySelect" aria-label="选择题目类型">
-                <option value="">-- 请选择 --</option>
+        <div class="select-row">
+            <div class="select-wrapper">
+                <label for="primarySelect" style="display:none">主类型</label>
+                <select id="primarySelect" aria-label="主类型选择">
+                    <option value="">-- 主类型 --</option>
+                    <option value="math_5_16">鸡兔同笼</option>
+                    <option value="math_6_16">等量代换</option>
+                    <option value="option3">其他题型 B</option>
+                </select>
+            </div>
 
-                <!-- 鸡兔同笼主类型，使用 data-subtype 指定不同生成逻辑 -->
-                <option value="math_5_16" data-subtype="type1">鸡兔同笼 — 简单</option>
-                <option value="math_5_16" data-subtype="type2">鸡兔同笼 — 中等</option>
-                <option value="math_5_16" data-subtype="type3">鸡兔同笼 — 变形一</option>
-                <option value="math_5_16" data-subtype="type4">鸡兔同笼 — 变形二</option>
-                <option value="math_5_16" data-subtype="type5">鸡兔同笼 — 变形三</option>
-
-                <!-- 其他题型示例 -->
-                <option value="option2" data-subtype="default">选项 2</option>
-                <option value="option3" data-subtype="default">选项 3</option>
-            </select>
+            <div class="select-wrapper">
+                <label for="subtypeSelect" style="display:none">子类型</label>
+                <select id="subtypeSelect" aria-label="子类型选择" disabled>
+                    <option value="">-- 先选主类型 --</option>
+                </select>
+            </div>
         </div>
 
         <button id="confirmBtn" onclick="handleConfirm()" disabled>确定</button>
-        <div class="note">选择类型后，后台生成不同题目。</div>
+        <div class="note">先选主类型，再选子类型；子类型会随主类型变化，提交时会把 type 和 subtype 一并传到服务器。</div>
     </div>
 
     <script>
-        const selectEl = document.getElementById('mySelect');
+        const primarySelect = document.getElementById('primarySelect');
+        const subtypeSelect = document.getElementById('subtypeSelect');
         const btn = document.getElementById('confirmBtn');
 
-        selectEl.addEventListener('change', function () {
-            btn.disabled = !this.value;
+        const subtypeMap = {
+            "math_5_16": [
+                { value: "type1", label: "Type1 — 简单" },
+                { value: "type2", label: "Type2 — 简单变式" },
+                { value: "type3", label: "Type3 — 变形一" },
+                { value: "type4", label: "Type4 — 变形二" },
+                { value: "type5", label: "Type5 — 提升难度" }
+            ],
+            "math_6_16": [
+                { value: "type1", label: "Type1 — 简单" },
+                { value: "type2", label: "Type1 — 变形一" }
+            ],
+            "option3": [
+                { value: "default", label: "默认" }
+            ]
+        };
+
+        function populateSubtype(primary) {
+            subtypeSelect.innerHTML = "";
+            const list = subtypeMap[primary] || [];
+            if (list.length === 0) {
+                subtypeSelect.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "-- 无子类型 --";
+                subtypeSelect.appendChild(opt);
+                return;
+            }
+            const placeholder = document.createElement('option');
+            placeholder.value = "";
+            placeholder.textContent = "-- 请选择子类型 --";
+            subtypeSelect.appendChild(placeholder);
+
+            list.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.value;
+                opt.textContent = item.label;
+                subtypeSelect.appendChild(opt);
+            });
+            subtypeSelect.disabled = false;
+        }
+
+        primarySelect.addEventListener('change', function() {
+            const val = this.value;
+            populateSubtype(val);
+            updateButtonState();
         });
 
-        selectEl.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter' && this.value) handleConfirm();
+        subtypeSelect.addEventListener('change', updateButtonState);
+
+        function updateButtonState() {
+            btn.disabled = !(primarySelect.value && subtypeSelect.value);
+        }
+
+        // 支持回车在子类型上提交
+        subtypeSelect.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !btn.disabled) handleConfirm();
         });
 
         function handleConfirm() {
-            const selectedValue = selectEl.value; // 主类型，例如 math_5_16
-            if (!selectedValue) {
-                alert('请先选择一个选项！');
+            const type = primarySelect.value;
+            const subtype = subtypeSelect.value;
+            if (!type || !subtype) {
+                alert('请先选择主类型和子类型。');
                 return;
             }
 
-            const selectedOption = selectEl.options[selectEl.selectedIndex];
-            const subtype = selectedOption.dataset.subtype || 'default';
-            const selectedText = selectedOption.text;
+            // 将 title 改为第一个选择框（主类型）的显示文本
+            const title = primarySelect.options[primarySelect.selectedIndex].text;
 
-            // 统一跳转到 /page，携带 type 与 subtype（后端根据 subtype 生成不同题目）
             const params = new URLSearchParams({
-                type: selectedValue,
+                type: type,
                 subtype: subtype,
-                title: selectedText,
-                
-                count: '5',
+                title: title,
+                count: '10',
                 timestamp: Date.now().toString()
             });
-
-            // 使用 /page 路由，后端 handlePageRequest 根据 type 与 subtype 决定渲染和题目生成
             window.location.href = `/page?${params.toString()}`;
         }
     </script>

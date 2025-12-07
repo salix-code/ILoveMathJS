@@ -31,9 +31,9 @@
         /* 页眉 */
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px; /* 从 30px 调小 */
             border-bottom: 2px solid #333;
-            padding-bottom: 15px;
+            padding-bottom: 12px; /* 从 15px 调小 */
         }
 
         .header h1 {
@@ -75,7 +75,7 @@
 
         /* 单个题目 */
         .question {
-            margin-bottom: 40px;
+            margin-bottom: 16px; /* 从 40px 调小为 16px */
             page-break-inside: avoid;
         }
 
@@ -101,8 +101,8 @@
 
         /* 答题区域 */
         .answer-area {
-            margin-top: 15px;
-            padding-left: 40px;
+            margin-top: 10px; /* 从 15px 调小 */
+            padding-left: 36px; /* 轻微调小 */
         }
 
         .answer-label {
@@ -113,20 +113,20 @@
 
         .answer-lines {
             border-top: 1px solid #ddd;
-            padding-top: 10px;
+            padding-top: 8px; /* 从 10px 调小 */
         }
 
         .answer-line {
-            height: 30px;
+            height: 22px; /* 从 30px 调小 */
             border-bottom: 1px dashed #ccc;
-            margin-bottom: 10px;
+            margin-bottom: 8px; /* 从 10px 调小 */
         }
 
         /* 分隔线 */
         .divider {
             height: 1px;
             background: linear-gradient(to right, transparent, #ddd, transparent);
-            margin: 30px 0;
+            margin: 18px 0; /* 从 30px 调小 */
         }
 
         /* 页脚 */
@@ -206,13 +206,7 @@
             <!-- 难度显示已移除 -->
         </div>
 
-        <!-- 学生信息 -->
-        <div class="student-info">
-            <div class="info-item">姓名: <span></span></div>
-            <div class="info-item">班级: <span></span></div>
-            <div class="info-item">日期: <span></span></div>
-            <div class="info-item">得分: <span></span></div>
-        </div>
+        
 
         <!-- 题目容器 -->
         <div class="questions-container" id="questionsContainer">
@@ -227,11 +221,7 @@
                 </div>
                 <div class="answer-area">
                     <div class="answer-label">答：</div>
-                    <div class="answer-lines">
-                        {{range $i := iterate .answerLines}}
-                        <div class="answer-line"></div>
-                        {{end}}
-                    </div>
+                    
                 </div>
             </div>
             {{if ne .number (len $.Questions)}}
@@ -240,10 +230,6 @@
             {{end}}
         </div>
 
-        <!-- 页脚 -->
-        <div class="footer">
-            第 1 页 | {{.Title}}
-        </div>
     </div>
 </body>
 </html>
