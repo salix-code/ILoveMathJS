@@ -6,6 +6,7 @@ type IQuestionTemplate interface {
 	randomData()
 	generateQuestion() string
 	getID() int
+	getKey() int
 }
 
 type FQuestionTemplate struct {
