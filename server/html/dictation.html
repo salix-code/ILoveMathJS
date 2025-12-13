@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictation - 默写练习</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .controls {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .control-group input,
+        .control-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-start {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-start:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-stop {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-stop:hover:not(:disabled) {
+            background: #da190b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .btn-stop:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .audio-list {
+            margin-bottom: 30px;
+        }
+
+        .audio-list h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .audio-items {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .audio-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .audio-item:last-child {
+            border-bottom: none;
+        }
+
+        .audio-item:hover {
+            background: #f0f0f0;
+        }
+
+        .audio-item.active {
+            background: #e3f2fd;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .audio-item-name {
+            flex: 1;
+        }
+
+        .audio-item-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-play {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .btn-play:hover {
+            background: #45a049;
+        }
+
+        .status {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .status-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .status-text strong {
+            color: #667eea;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Dictation</h1>
+        <p class="subtitle">默写练习 - 逐个播放音频，按照间隔时间重复</p>
+
+        <div class="status">
+            <div class="status-text">状态: <strong id="statusText">未开始</strong></div>
+            <div class="status-text" id="progressText" style="margin-top: 5px; font-size: 12px;"></div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="interval">间隔时间（秒）：</label>
+                <input type="number" id="interval" min="1" max="60" value="3" step="1">
+            </div>
+
+            <div class="control-group">
+                <label for="repeatCount">每个音频重复次数：</label>
+                <input type="number" id="repeatCount" min="1" max="10" value="3" step="1">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-start" id="startBtn">▶ 开始默写</button>
+                <button class="btn-stop" id="stopBtn" disabled>⏹ 停止</button>
+            </div>
+        </div>
+
+        <div class="audio-list">
+            <h2>音频列表</h2>
+            <div class="audio-items" id="audioList">
+                <!-- 音频项会动态添加到这里 -->
+            </div>
+        </div>
+
+        <!-- 隐藏的音频元素，用于播放 -->
+        <audio id="audioPlayer" style="display: none;"></audio>
+    </div>
+
+    <script>
+        // 从服务器获取音频数据
+        let audioData = [];
+        const audioPlayer = document.getElementById('audioPlayer');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const intervalInput = document.getElementById('interval');
+        const repeatCountInput = document.getElementById('repeatCount');
+        const audioListContainer = document.getElementById('audioList');
+        const statusText = document.getElementById('statusText');
+        const progressText = document.getElementById('progressText');
+
+        let isPlaying = false;
+        let currentIndex = 0;
+        let currentRepeat = 0;
+        let playQueue = [];
+
+        // 初始化音频列表
+        function initializeAudioList() {
+            audioListContainer.innerHTML = '';
+            audioData.forEach((audio, index) => {
+                const item = document.createElement('div');
+                item.className = 'audio-item';
+                item.innerHTML = `
+                    <span class="audio-item-name">${audio.name}</span>
+                    <div class="audio-item-controls">
+                        <button class="btn-play" onclick="playAudio(${index})">试听</button>
+                    </div>
+                `;
+                audioListContainer.appendChild(item);
+            });
+        }
+
+        // 试听单个音频
+        function playAudio(index) {
+            if (audioData[index]) {
+                audioPlayer.src = audioData[index].src;
+                audioPlayer.play().catch(err => {
+                    console.error('播放失败:', err);
+                    alert('播放音频失败，请检查文件路径：' + audioData[index].src);
+                });
+            }
+        }
+
+        // 开始默写
+        startBtn.addEventListener('click', function() {
+            isPlaying = true;
+            currentIndex = 0;
+            currentRepeat = 0;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            intervalInput.disabled = true;
+            repeatCountInput.disabled = true;
+
+            const interval = parseInt(intervalInput.value);
+            const repeatCount = parseInt(repeatCountInput.value);
+
+            statusText.textContent = '正在播放...';
+            playNextAudio(interval, repeatCount);
+        });
+
+        // 停止默写
+        stopBtn.addEventListener('click', function() {
+            isPlaying = false;
+            audioPlayer.pause();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            intervalInput.disabled = false;
+            repeatCountInput.disabled = false;
+            statusText.textContent = '已停止';
+            progressText.textContent = '';
+            updateAudioListUI(-1);
+        });
+
+        // 播放下一个音频
+        function playNextAudio(interval, repeatCount) {
+            if (!isPlaying) return;
+
+            if (currentIndex >= audioData.length) {
+                // 所有音频播放完成
+                isPlaying = false;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                intervalInput.disabled = false;
+                repeatCountInput.disabled = false;
+                statusText.textContent = '完成！';
+                progressText.textContent = '';
+                updateAudioListUI(-1);
+                return;
+            }
+
+            const audio = audioData[currentIndex];
+            updateAudioListUI(currentIndex);
+            statusText.textContent = `正在播放: ${audio.name}`;
+            progressText.textContent = `进度: ${currentIndex + 1}/${audioData.length} | 重复: ${currentRepeat + 1}/${repeatCount}`;
+
+            audioPlayer.src = audio.src;
+            audioPlayer.play().catch(err => {
+                console.error('播放失败:', err);
+            });
+
+            currentRepeat++;
+
+            if (currentRepeat >= repeatCount) {
+                // 该音频播放完，移到下一个
+                currentRepeat = 0;
+                currentIndex++;
+                setTimeout(() => playNextAudio(interval, repeatCount), interval * 1000);
+            } else {
+                // 继续重复当前音频
+                setTimeout(() => playNextAudio(interval, repeatCount), interval * 1000);
+            }
+        }
+
+        // 更新音频列表UI（高亮当前播放的）
+        function updateAudioListUI(activeIndex) {
+            const items = document.querySelectorAll('.audio-item');
+            items.forEach((item, index) => {
+                if (index === activeIndex) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAudioDataFromServer();
+        });
+
+        // 从服务器获取音频数据
+        async function loadAudioDataFromServer() {
+            try {
+                // 获取URL参数中的type和subtype
+                const params = new URLSearchParams(window.location.search);
+                const type = params.get('type') || 'default';
+                const subtype = params.get('subtype') || 'type1';
+
+                const response = await fetch(`/api/dictation?type=${type}&subtype=${subtype}`);
+                if (!response.ok) {
+                    throw new Error('Failed to load audio data');
+                }
+
+                audioData = await response.json();
+                initializeAudioList();
+            } catch (error) {
+                console.error('加载音频数据失败:', error);
+                alert('无法从服务器加载音频数据。请检查服务器连接。');
+                // 加载备用数据用于测试
+                audioData = [
+                    { id: 1, name: 'Sample Audio 1', src: '/audio/sample1.mp3' },
+                    { id: 2, name: 'Sample Audio 2', src: '/audio/sample2.mp3' },
+                ];
+
+               
+            }
+             initializeAudioList();
+        }
+    </script>
+</body>
+</html>
