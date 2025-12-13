@@ -2,7 +2,7 @@ package questions
 
 func init() {
 	qt := GetQuestionTemplate()
-	qt.RegisterTemplate(5, 13, new(QuestionTemplate513_1))
+	qt.RegisterTemplate(5, 13, 1, new(QuestionTemplate513_1))
 }
 
 type QuestionTemplate513_1 struct {
@@ -20,4 +20,6 @@ func (me *QuestionTemplate513_1) getID() int {
 	return 1
 }
 
-func (me *QuestionTemplate513_1) getKey() int {}
+func (me *QuestionTemplate513_1) getKey() int {
+	return 0
+}

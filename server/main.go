@@ -1,99 +1,118 @@
 package main
 
 import (
-    "html/template"
-    "math/rand"
-    "net/http"
-    "strconv"
-    "time"
+	"html/template"
+	"math/rand"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
 
-    "github.com/gin-gonic/gin"
-    "mymathjs/server/questions"
+	"mymathjs/server/questions"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-    rand.Seed(time.Now().UnixNano())
-    r := gin.Default()
+	rand.Seed(time.Now().UnixNano())
+	r := gin.Default()
 
-    r.SetFuncMap(template.FuncMap{
-        "iterate": func(count int) []int {
-            result := make([]int, count)
-            for i := range result {
-                result[i] = i
-            }
-            return result
-        },
-    })
+	r.SetFuncMap(template.FuncMap{
+		"iterate": func(count int) []int {
+			result := make([]int, count)
+			for i := range result {
+				result[i] = i
+			}
+			return result
+		},
+	})
 
-    r.Static("/static", "./static")
-    r.LoadHTMLGlob("html/*")
+	r.Static("/static", "./static")
+	r.LoadHTMLGlob("html/*")
 
-    r.GET("/", func(c *gin.Context) {
-        c.HTML(http.StatusOK, "index.html", nil)
-    })
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
 
-    r.GET("/page", handlePageRequest)
-    r.GET("/api/generate/:type", generateQuestions)
-    r.Run(":8080")
+	r.GET("/page", handlePageRequest)
+	r.GET("/api/generate/:type", generateQuestions)
+	r.Run(":8080")
 }
 
 func handlePageRequest(c *gin.Context) {
-    questionType := c.Query("type")
-    subType := c.DefaultQuery("subtype", "type1")
-    title := c.Query("title")
-    count, _ := strconv.Atoi(c.DefaultQuery("count", "10"))
+	questionType := c.Query("type")
+	subType := c.DefaultQuery("subtype", "type1")
+	title := c.Query("title")
+	count, _ := strconv.Atoi(c.DefaultQuery("count", "10"))
 
-    var templateName string
-    var pageData gin.H
+	var templateName string
+	var pageData gin.H
 
-    switch questionType {
-    case "math_5_16":
-        templateName = "page.html"
-        qs := questions.GenerateMath516Questions(subType, count)
-        pageData = gin.H{
-            "Title":     title,
-            "Type":      questionType,
-            "Subtype":   subType,
-            "Questions": qs,
-        }
+	switch questionType {
+	case "math_5_16":
+		templateName = "page.html"
+		qs := questions.GenerateMath516Questions(subType, count)
+		pageData = gin.H{
+			"Title":     title,
+			"Type":      questionType,
+			"Subtype":   subType,
+			"Questions": qs,
+		}
 
-    case "math_6_16":
-        templateName = "page.html"
-        qs := questions.GenerateMath616Questions(subType, count)
-        pageData = gin.H{
-            "Title":     title,
-            "Type":      questionType,
-            "Subtype":   subType,
-            "Questions": qs,
-        }
+	case "math_6_16":
+		templateName = "page.html"
+		qs := questions.GenerateMath616Questions(subType, count)
+		pageData = gin.H{
+			"Title":     title,
+			"Type":      questionType,
+			"Subtype":   subType,
+			"Questions": qs,
+		}
 
-    default:
-        c.String(http.StatusNotFound, "未找到对应的题型")
-        return
-    }
+	default:
+		templateName = "page.html"
+		parts := strings.Split(questionType, "_")
+		if len(parts) == 3 {
+			chapter, _ := strconv.Atoi(parts[1]) // 5
+			section, _ := strconv.Atoi(parts[2]) // 15 或 12
 
-    c.HTML(http.StatusOK, templateName, pageData)
+			if len(subType) > 4 && subType[:4] == "type" {
+				numStr := strings.TrimPrefix(subType, "type")
+				subTypeID, _ := strconv.Atoi(numStr)
+				qs := questions.GenerateQuestions(chapter, section, subTypeID, count)
+				pageData = gin.H{
+					"Title":     title,
+					"Type":      questionType,
+					"Subtype":   subType,
+					"Questions": qs,
+				}
+			}
+		}
+
+	}
+
+	c.HTML(http.StatusOK, templateName, pageData)
 }
 
 func generateQuestions(c *gin.Context) {
-    questionType := c.Param("type")
-    subType := c.DefaultQuery("subtype", "type1")
-    count, _ := strconv.Atoi(c.DefaultQuery("count", "10"))
+	questionType := c.Param("type")
+	subType := c.DefaultQuery("subtype", "type1")
+	count, _ := strconv.Atoi(c.DefaultQuery("count", "10"))
 
-    var qs []interface{}
+	var qs []interface{}
 
-    switch questionType {
-    case "math_5_16":
-        qs = questions.GenerateMath516Questions(subType, count)
-    default:
-        c.JSON(http.StatusBadRequest, gin.H{"error": "未知题型"})
-        return
-    }
+	switch questionType {
+	case "math_5_16":
+		qs = questions.GenerateMath516Questions(subType, count)
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "未知题型"})
+		return
+	}
 
-    c.JSON(http.StatusOK, gin.H{
-        "success":   true,
-        "type":      questionType,
-        "subtype":   subType,
-        "questions": qs,
-    })
+	c.JSON(http.StatusOK, gin.H{
+		"success":   true,
+		"type":      questionType,
+		"subtype":   subType,
+		"questions": qs,
+	})
 }

@@ -98,6 +98,7 @@
             line-height: 1.8;
             color: #333;
         }
+        
 
         /* 答题区域 */
         .answer-area {
@@ -213,9 +214,9 @@
             {{range .Questions}}
             <div class="question">
                 <div class="question-header">
-                    <span class="question-number">{{.number}}.</span>
+                    <span class="question-number">{{.Number}}.</span>
                     <div class="question-content">
-                        {{.content}}
+                        {{.Content}}
                         <!-- 难度标识已删除 -->
                     </div>
                 </div>
@@ -224,7 +225,7 @@
                     
                 </div>
             </div>
-            {{if ne .number (len $.Questions)}}
+            {{if ne .Number (len $.Questions)}}
             <div class="divider"></div>
             {{end}}
             {{end}}

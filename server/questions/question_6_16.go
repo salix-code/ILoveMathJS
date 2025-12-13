@@ -9,12 +9,17 @@ import (
 
 func init() {
 	qt := GetQuestionTemplate()
-	qt.RegisterTemplate(6, 16, new(QuestionTemplate616_1))
+	qt.RegisterTemplate(6, 16, 1, new(QuestionTemplate616_1))
 }
 
 type QuestionTemplate616_1 struct {
 	number [5]int
 	name   []string
+}
+
+// getKey implements IQuestionTemplate.
+func (me *QuestionTemplate616_1) getKey() int {
+	panic("unimplemented")
 }
 
 func (me *QuestionTemplate616_1) randomData() {
