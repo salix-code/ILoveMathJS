@@ -10,6 +10,7 @@ func init() {
 	qt.RegisterTemplate(5, 12, 1, new(QuestionTemplate512_1))
 	qt.RegisterTemplate(5, 12, 2, new(QuestionTemplate512_2))
 	qt.RegisterTemplate(5, 12, 3, new(QuestionTemplate512_3))
+	qt.RegisterTemplate(5, 12, 4, new(QuestionTemplate512_4))
 }
 
 type QuestionTemplate512_1 struct {
