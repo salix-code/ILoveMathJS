@@ -3,13 +3,14 @@ package questions
 import (
 	"fmt"
 	"math/rand"
-
-	"github.com/gin-gonic/gin"
 )
 
 func init() {
 	qt := GetQuestionTemplate()
 	qt.RegisterTemplate(6, 16, 1, new(QuestionTemplate616_1))
+	qt.RegisterTemplate(6, 16, 2, new(QuestionTemplate616_2))
+	qt.RegisterTemplate(6, 16, 3, new(QuestionTemplate616_3))
+	qt.RegisterTemplate(6, 16, 4, new(QuestionTemplate616_4))
 }
 
 type QuestionTemplate616_1 struct {
@@ -24,7 +25,7 @@ func (me *QuestionTemplate616_1) getKey() int {
 
 func (me *QuestionTemplate616_1) randomData() {
 	if len(me.name) == 0 {
-		me.name = append(me.name, "苹果", "鸭梨", "香蕉", "羊", "兔", "骆驼")
+		me.name = append(me.name, "苹果", "鸭梨", "香蕉", "羊", "兔", "骆驼", "鸡", "鸭", "鹅", "蓝球", "足球", "排球")
 	}
 	me.number[0] = rand.Intn(3) + 2
 	me.number[1] = me.number[0] * (rand.Intn(3) + 2)
@@ -73,76 +74,78 @@ func (me *QuestionTemplate616_2) getID() int {
 func (me *QuestionTemplate616_2) generateQuestion() string {
 	title := fmt.Sprintf("学校买了%d个蓝球和%d个排球，一共用了%d元，", me.baseketball, me.volleyball, me.totalPrice)
 	title += fmt.Sprintf("%d个蓝球与%d个排球的价钱相等，", me.number[0], me.number[1])
-	title += fmt.Sprintf("每一个蓝球多少元")
+	title += "每一个蓝球多少元"
 	return title
+}
+func (me *QuestionTemplate616_2) getKey() int {
+	return hashHelper.HashInt(me.baseketball, me.volleyball, me.totalPrice)
 }
 
 type QuestionTemplate616_3 struct {
-	scienceBook int
 	storyBook   int
+	scienceBook int
 	essayBook   int
 }
 
 func (me *QuestionTemplate616_3) randomData() {
-	me.scienceBook = (rand.Intn(20) + 40)
 	me.storyBook = (rand.Intn(30) + 30)
+	me.scienceBook = (rand.Intn(20) + 40)
 	me.essayBook = (rand.Intn(40) + 20)
 }
 
 func (me *QuestionTemplate616_3) generateQuestion() string {
-	title := fmt.Sprintf("某班有一个图书角，共有")
-	title += fmt.Sprintf("故事书和科技书%d本，", me.storyBook+me.scienceBook)
-	title += fmt.Sprintf("故事书和作文书%d本，", me.storyBook+me.essayBook)
-	title += fmt.Sprintf("科技书和作文书%d本，", me.scienceBook+me.essayBook)
-	title += fmt.Sprintf("每一个各类种有多少本书？")
-	return title
-
-}
-
-func (me *QuestionTemplate616_3) getID() int {
-	return 3
-}
-
-func GenerateMath616Questions(subtype string, count int) []interface{} {
-	qs := make([]interface{}, count)
-	tplContainer := GetQuestionTemplate()
-
-	for i := 0; i < count; i++ {
-
-		var questionText string
-		switch subtype {
-		case "type1":
-			tpl := tplContainer.GetTemplate(6, 16, 1)
-
-			tpl.randomData()
-			questionText = tpl.generateQuestion()
-
-		case "type2":
-			tpl := tplContainer.GetTemplate(6, 16, 2)
-			tpl.randomData()
-			questionText = tpl.generateQuestion()
-
-		case "type3":
-			tpl := tplContainer.GetTemplate(6, 16, 3)
-			tpl.randomData()
-			questionText = tpl.generateQuestion()
-
-		case "type4":
-
-		case "type5":
-
-		default:
-
-		}
-
-		qs[i] = gin.H{
-			"number":      i + 1,
-			"content":     questionText,
-			"type":        "鸡兔同笼",
-			"subtype":     subtype,
-			"answerLines": 1,
-		}
+	namePool := [][]string{
+		{"某班有一个图书角，共有", "故事书", "科技书", "作文书", "本"},
+		{"妈妈买了一些水果，共有", "苹果", "香蕉", "鸭梨", "个"},
+		{"小明有一些文具，共有", "铅笔", "橡皮", "尺子", "支"},
+		{"小红有一些玩具，共有", "布娃娃", "积木", "玩偶", "个"},
+		{"班主任把一些花生分給小花，小石和小奧，其中", "小花", "小石", "小奧", "颗"},
 	}
+	nameIndex := rand.Intn(len(namePool))
+	title := namePool[nameIndex][0]
+	title += fmt.Sprintf("%s和%s共有%d%s，", namePool[nameIndex][1], namePool[nameIndex][2], me.storyBook+me.scienceBook, namePool[nameIndex][4])
+	title += fmt.Sprintf("%s和%s共有%d%s，", namePool[nameIndex][1], namePool[nameIndex][3], me.storyBook+me.essayBook, namePool[nameIndex][4])
+	title += fmt.Sprintf("%s和%s共有%d%s，", namePool[nameIndex][2], namePool[nameIndex][3], me.scienceBook+me.essayBook, namePool[nameIndex][4])
+	title += fmt.Sprintf("各类各有多少%s？", namePool[nameIndex][4])
+	return title
+}
 
-	return qs
+func (me *QuestionTemplate616_3) getKey() int {
+	return hashHelper.HashInt(me.scienceBook, me.storyBook, me.essayBook)
+}
+
+type QuestionTemplate616_4 struct {
+	pear   int
+	apple  int
+	orange int
+}
+
+func (me *QuestionTemplate616_4) randomData() {
+	me.pear = rand.Intn(10) + 10
+	me.apple = rand.Intn(10) + 10
+	me.orange = rand.Intn(10) + 10
+}
+func (me *QuestionTemplate616_4) generateQuestion() string {
+	a := 1
+	b := a + rand.Intn(3) + 1
+	total := me.pear + me.apple + me.orange
+	condition := []string{
+		fmt.Sprintf("%d個梨子 ＋ %d個蘋果 ＋ %d個桔子 = %d克", a, a, b, total+me.orange*(b-a)),
+		fmt.Sprintf("%d個梨子 ＋ %d個蘋果 ＋ %d個桔子 = %d克", a, b, a, total+me.apple*(b-a)),
+		fmt.Sprintf("%d個梨子 ＋ %d個蘋果 ＋ %d個桔子 = %d克", b, a, a, total+me.pear*(b-a)),
+	}
+	return fmt.Sprintf(`<div style="margin-left: 20px; text-align: left;">
+        <p>已知梨子，蘋果和桔子的重量有以下關係：</p>
+        <div style="margin-left: 10px; margin-top: 8px;">
+            <div>%s</div>
+            <div>%s</div>
+            <div>%s</div>
+            <div>那麼，每一種水果的重複是多少克</div>
+			
+        </div>
+    </div>`, condition[0], condition[1], condition[2])
+}
+
+func (me *QuestionTemplate616_4) getKey() int {
+	return hashHelper.HashInt(me.pear, me.apple, me.orange)
 }

@@ -59,16 +59,6 @@ func handlePageRequest(c *gin.Context) {
 			"Questions": qs,
 		}
 
-	case "math_6_16":
-		templateName = "page.html"
-		qs := questions.GenerateMath616Questions(subType, count)
-		pageData = gin.H{
-			"Title":     title,
-			"Type":      questionType,
-			"Subtype":   subType,
-			"Questions": qs,
-		}
-
 	default:
 		templateName = "page.html"
 		parts := strings.Split(questionType, "_")
