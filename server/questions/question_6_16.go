@@ -11,6 +11,7 @@ func init() {
 	qt.RegisterTemplate(6, 16, 2, new(QuestionTemplate616_2))
 	qt.RegisterTemplate(6, 16, 3, new(QuestionTemplate616_3))
 	qt.RegisterTemplate(6, 16, 4, new(QuestionTemplate616_4))
+	qt.RegisterTemplate(6, 16, 5, new(QuestionTemplate616_5))
 }
 
 type QuestionTemplate616_1 struct {
@@ -148,4 +149,39 @@ func (me *QuestionTemplate616_4) generateQuestion() string {
 
 func (me *QuestionTemplate616_4) getKey() int {
 	return hashHelper.HashInt(me.pear, me.apple, me.orange)
+}
+
+type QuestionTemplate616_5 struct {
+	people int
+}
+
+func (me *QuestionTemplate616_5) randomData() {
+	me.people = rand.Intn(4) + 2
+
+}
+
+func (me *QuestionTemplate616_5) generateQuestion() string {
+	namePool := []string{"小明", "小红", "小刚", "小华", "小丽", "小强", "小美", "小东", "小西", "小南", "小北"}
+	nameIndex := rand.Perm(len(namePool))
+	title := []string{}
+	title = append(title, "")
+	for i := 0; i < me.people-1; i++ {
+		title[0] = title[0] + namePool[nameIndex[i]] + "、"
+	}
+	title[0] = title[0] + "和" + namePool[nameIndex[me.people-1]] + "去买同一个产品"
+
+	title = append(title, "")
+	title[1] = fmt.Sprint("買一個分別欠")
+	for i := 0; i < me.people-1; i++ {
+		title[1] = title[1] + fmt.Sprintf("%d元、", rand.Intn(5)+1)
+	}
+	title[1] = title[1] + fmt.Sprintf("和%d元", rand.Intn(5)+1)
+
+	title = append(title, "他們合資買%d個產品")
+
+	return title
+}
+
+func (me *QuestionTemplate616_5) getKey() int {
+
 }
