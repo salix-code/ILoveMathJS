@@ -3,6 +3,7 @@ package questions
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 )
 
 func init() {
@@ -179,9 +180,9 @@ func (me *QuestionTemplate616_5) generateQuestion() string {
 
 	title = append(title, "他們合資買%d個產品")
 
-	return title
+	return strings.Join(title, "")
 }
 
 func (me *QuestionTemplate616_5) getKey() int {
-
+	return hashHelper.HashInt(me.people)
 }

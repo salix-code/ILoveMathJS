@@ -65,10 +65,12 @@ type QuestionTemplate515_2 struct {
 	askYear      int
 	askMonth     int
 	askDay       int
+	mode         int
 }
 
 func (me *QuestionTemplate515_2) randomData() {
 	// 随机生成已知日期（2020-2030年）
+	me.mode = rand.Intn(2)
 	me.year = rand.Intn(10) + 2020
 	me.month = rand.Intn(12) + 1
 
@@ -94,19 +96,34 @@ func (me *QuestionTemplate515_2) randomData() {
 	me.weekday = int(knownDate.Weekday())
 
 	// 随机生成要问的日期（在已知日期后的30-90天内）
-	me.askDaysAfter = rand.Intn(60) + 300
-	askDate := knownDate.AddDate(0, 0, me.askDaysAfter)
-	me.askYear = askDate.Year()
-	me.askMonth = int(askDate.Month())
-	me.askDay = askDate.Day()
+
+	if me.mode == 1 {
+		me.askDaysAfter = rand.Intn(60) + 120
+		askDate := knownDate.AddDate(0, 0, me.askDaysAfter)
+		me.askYear = askDate.Year()
+		me.askMonth = int(askDate.Month())
+		me.askDay = askDate.Day()
+	} else {
+		me.askDaysAfter = rand.Intn(180) + 185
+	}
+
 }
 
 func (me *QuestionTemplate515_2) generateQuestion() string {
 	weekdayNames := []string{"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"}
-
-	return fmt.Sprintf("已知%d年%d月%d日是%s，那么%d年%d月%d日是星期几？",
-		me.year, me.month, me.day, weekdayNames[me.weekday],
-		me.askYear, me.askMonth, me.askDay)
+	questionPool := []string{
+		"已知%d年%d月%d日是%s，那么%d天后是星期几？",
+		"已知%d年%d月%d日是%s，那么%d年%d月%d日是星期几？",
+	}
+	if me.mode == 1 {
+		return fmt.Sprintf(questionPool[1],
+			me.year, me.month, me.day, weekdayNames[me.weekday],
+			me.askYear, me.askMonth, me.askDay)
+	} else {
+		return fmt.Sprintf(questionPool[0],
+			me.year, me.month, me.day, weekdayNames[me.weekday],
+			me.askDaysAfter)
+	}
 }
 
 func (me *QuestionTemplate515_2) getKey() int {

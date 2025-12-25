@@ -66,16 +66,12 @@ func handlePageRequest(c *gin.Context) {
 			chapter, _ := strconv.Atoi(parts[1]) // 5
 			section, _ := strconv.Atoi(parts[2]) // 15 或 12
 
-			if len(subType) > 4 && subType[:4] == "type" {
-				numStr := strings.TrimPrefix(subType, "type")
-				subTypeID, _ := strconv.Atoi(numStr)
-				qs := questions.GenerateQuestions(chapter, section, subTypeID, count)
-				pageData = gin.H{
-					"Title":     title,
-					"Type":      questionType,
-					"Subtype":   subType,
-					"Questions": qs,
-				}
+			qs := questions.GenerateQuestions(chapter, section, subType, count)
+			pageData = gin.H{
+				"Title":     title,
+				"Type":      questionType,
+				"Subtype":   subType,
+				"Questions": qs,
 			}
 		}
 
