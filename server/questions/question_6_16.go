@@ -1,5 +1,6 @@
 package questions
 
+// 等价代换
 import (
 	"fmt"
 	"math/rand"
@@ -8,7 +9,7 @@ import (
 
 func init() {
 	qt := GetQuestionTemplate()
-	qt.RegisterTemplate(6, 16, 1, new(QuestionTemplate616_1))
+	qt.RegisterTemplate(6, 16, 1, NewQuestionTemplate616_1())
 	qt.RegisterTemplate(6, 16, 2, new(QuestionTemplate616_2))
 	qt.RegisterTemplate(6, 16, 3, new(QuestionTemplate616_3))
 	qt.RegisterTemplate(6, 16, 4, new(QuestionTemplate616_4))
@@ -17,7 +18,10 @@ func init() {
 
 type QuestionTemplate616_1 struct {
 	number [5]int
-	name   []string
+}
+
+func NewQuestionTemplate616_1() *QuestionTemplate616_1 {
+	return &QuestionTemplate616_1{}
 }
 
 // getKey implements IQuestionTemplate.
@@ -26,20 +30,22 @@ func (me *QuestionTemplate616_1) getKey() int {
 }
 
 func (me *QuestionTemplate616_1) randomData() {
-	if len(me.name) == 0 {
-		me.name = append(me.name, "苹果", "鸭梨", "香蕉", "羊", "兔", "骆驼", "鸡", "鸭", "鹅", "蓝球", "足球", "排球")
-	}
 	me.number[0] = rand.Intn(3) + 2
 	me.number[1] = me.number[0] * (rand.Intn(3) + 2)
 	me.number[2] = rand.Intn(5) + 2
-	me.number[3] = me.number[2] * (rand.Intn(2) + 2)
-	me.number[4] = rand.Intn(5) + 2
+	a := (rand.Intn(3) + 5)
+	me.number[3] = me.number[2] * a
+	me.number[4] = (rand.Intn(me.number[2]-1) + 1) * a
 }
 
 func (me *QuestionTemplate616_1) generateQuestion() string {
-	index := rand.Intn(len(me.name)/3) * 3
-	return fmt.Sprintf("%d只%s可以换%d只%s,%d只%s可以换%d只%s，问：%d只%s可以换多少只%s？",
-		me.number[0], me.name[index], me.number[1], me.name[index+1], me.number[2], me.name[index], me.number[3], me.name[2+index], me.number[4], me.name[2+index], me.name[1+index])
+	namePool := []string{"苹果", "鸭梨", "香蕉", "羊", "兔", "骆驼", "鸡", "鸭", "鹅", "蓝球", "足球", "排球"}
+
+	nameIndex := rand.Intn(len(namePool)/3) * 3
+	name := namePool[nameIndex : nameIndex+3]
+
+	return fmt.Sprintf("%d个%s可以换%d个%s,%d个%s可以换%d个%s，问：%d个%s可以换多少个%s？",
+		me.number[0], name[0], me.number[1], name[1], me.number[2], name[0], me.number[3], name[2], me.number[4], name[2], name[1])
 }
 
 func (me *QuestionTemplate616_1) getID() int {
