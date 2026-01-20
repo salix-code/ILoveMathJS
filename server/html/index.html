@@ -1,178 +1,130 @@
+
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>选择页面</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习导航</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Arial','Microsoft YaHei',sans-serif;
-            background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-            min-height:100vh; display:flex; justify-content:center; align-items:center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f7f9fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
         }
         .container {
-            background:white; padding:40px 60px; border-radius:15px;
-            box-shadow:0 10px 40px rgba(0,0,0,0.2); text-align:center; min-width:420px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            max-width: 600px;
+            width: 90%;
+            padding: 20px;
         }
-        h1 { color:#333; margin-bottom:24px; font-size:24px; }
-        .select-row { display:flex; gap:12px; align-items:center; margin-bottom:20px; }
-        .select-wrapper { flex:1; }
-        select {
-            width:100%; padding:12px 15px; font-size:16px; border:2px solid #ddd;
-            border-radius:8px; background:white; cursor:pointer; appearance:none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat:no-repeat; background-position:right 12px center; background-size:18px;
-            padding-right:44px;
+        .card {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: #4a4a4a;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-size: 24px;
+            font-weight: bold;
+            flex-direction: column;
+            border: 2px solid transparent;
+            cursor: pointer;
         }
-        button {
-            width:100%; padding:12px 14px; font-size:16px; font-weight:600; color:#fff;
-            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); border:none; border-radius:8px;
-            cursor:pointer; box-shadow:0 6px 18px rgba(102,126,234,0.35);
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
         }
-        button:disabled { background:#bbb; cursor:not-allowed; box-shadow:none; }
-        .note { margin-top:12px; font-size:13px; color:#666; }
+        .card-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        /* Specific Styles */
+        .math {
+            border-bottom: 5px solid #FF6B6B;
+        }
+        .math:hover {
+            color: #FF6B6B;
+            border-color: #FF6B6B;
+        }
+        .math .card-icon { color: #FF6B6B; }
+
+        .english {
+            border-bottom: 5px solid #4ECDC4;
+        }
+        .english:hover {
+            color: #4ECDC4;
+            border-color: #4ECDC4;
+        }
+        .english .card-icon { color: #4ECDC4; }
+
+        .chinese {
+            border-bottom: 5px solid #45B7D1;
+        }
+        .chinese:hover {
+            color: #45B7D1;
+            border-color: #45B7D1;
+        }
+        .chinese .card-icon { color: #45B7D1; }
+
+        .general {
+            border-bottom: 5px solid #96CEB4;
+        }
+        .general:hover {
+            color: #96CEB4;
+            border-color: #96CEB4;
+        }
+        .general .card-icon { color: #96CEB4; }
+
+        @media (max-width: 500px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .card {
+                aspect-ratio: auto;
+                height: 120px;
+                flex-direction: row;
+                justify-content: flex-start;
+                padding-left: 30px;
+            }
+            .card-icon {
+                margin-bottom: 0;
+                margin-right: 20px;
+                font-size: 40px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>请选择题目类型</h1>
-        <div class="select-row">
-            <div class="select-wrapper">
-                <label for="primarySelect" style="display:none">主类型</label>
-                <select id="primarySelect" aria-label="主类型选择">
-                    <option value="">-- 主类型 --</option>
-                    <option value="math_5_16">鸡兔同笼</option>
-                    <option value="math_6_16">等量代换</option>
-                    <option value="math_5_12">归一问题</option>
-                    <option value="math_5_13">和倍問題</option>
-                    <option value="math_5_15">周期问题</option>
-                    <option value="math_3_1">数列问题</option>
-                    <option value="math_3_2">公式代换</option>
-                </select>
-            </div>
-
-            <div class="select-wrapper">
-                <label for="subtypeSelect" style="display:none">子类型</label>
-                <select id="subtypeSelect" aria-label="子类型选择" disabled>
-                    <option value="">-- 先选主类型 --</option>
-                </select>
-            </div>
-        </div>
-
-        <button id="confirmBtn" onclick="handleConfirm()" disabled>确定</button>
-        <div class="note">先选主类型，再选子类型；子类型会随主类型变化，提交时会把 type 和 subtype 一并传到服务器。</div>
+        <a href="math" class="card math">
+            <div class="card-icon">∑</div>
+            <div>数学</div>
+        </a>
+        <a href="english.html" class="card english">
+            <div class="card-icon">Abc</div>
+            <div>英文</div>
+        </a>
+        <a href="chinese.html" class="card chinese">
+            <div class="card-icon">文</div>
+            <div>语文</div>
+        </a>
+        <a href="general.html" class="card general">
+            <div class="card-icon">💡</div>
+            <div>常识</div>
+        </a>
     </div>
-
-    <script>
-        const primarySelect = document.getElementById('primarySelect');
-        const subtypeSelect = document.getElementById('subtypeSelect');
-        const btn = document.getElementById('confirmBtn');
-
-        const subtypeMap = {
-            "math_5_16": [
-                { value: "type-1", label: "Type1 — 简单" },
-                { value: "type-2", label: "Type2 — 简单变式" },
-                { value: "type-3", label: "Type3 — 变形一" },
-                { value: "type-4", label: "Type4 — 变形二" },
-                { value: "type-5", label: "Type5 — 提升难度" }
-            ],
-            "math_6_16": [
-                { value: "type-1", label: "简单" },
-                { value: "type-2", label: "变形一" },
-                { value: "type-3", label: "两人共有" },
-                { value: "type-4", label: "三者共有" },
-                { value: "type-5", label: "各欠多少" },
-                { value: "group",  label: "综合" },
-
-            ],
-            "math_5_12" : [
-
-                { value: "type-1", label: "度量归一" },
-                { value: "type-2", label: "单人加工" },
-                { value: "type-3", label: "双人加工" },
-                { value: "type-4", label: "缺人加工" },
-            ],
-            "math_5_13" : [
-                { value: "type-1", label: "简单和倍" },
-            ],
-            "math_5_15": [
-                { value: "type-1", label: "排列" },
-                { value: "type-2", label: "星期几" },
-                { value: "type-3", label: "选择谁" },
-                { value: "type-4", label: "天干地支" },
-            ],
-            "math_3_1": [
-                { value: "type-1", label: "是第几个" },
-            ],
-            "math_3_2": [
-                { value: "type-1", label: "简单代换" },
-                
-            ],
-        };
-
-        function populateSubtype(primary) {
-            subtypeSelect.innerHTML = "";
-            const list = subtypeMap[primary] || [];
-            if (list.length === 0) {
-                subtypeSelect.disabled = true;
-                const opt = document.createElement('option');
-                opt.value = "";
-                opt.textContent = "-- 无子类型 --";
-                subtypeSelect.appendChild(opt);
-                return;
-            }
-            const placeholder = document.createElement('option');
-            placeholder.value = "";
-            placeholder.textContent = "-- 请选择子类型 --";
-            subtypeSelect.appendChild(placeholder);
-
-            list.forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item.value;
-                opt.textContent = item.label;
-                subtypeSelect.appendChild(opt);
-            });
-            subtypeSelect.disabled = false;
-        }
-
-        primarySelect.addEventListener('change', function() {
-            const val = this.value;
-            populateSubtype(val);
-            updateButtonState();
-        });
-
-        subtypeSelect.addEventListener('change', updateButtonState);
-
-        function updateButtonState() {
-            btn.disabled = !(primarySelect.value && subtypeSelect.value);
-        }
-
-        // 支持回车在子类型上提交
-        subtypeSelect.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !btn.disabled) handleConfirm();
-        });
-
-        function handleConfirm() {
-            const type = primarySelect.value;
-            const subtype = subtypeSelect.value;
-            if (!type || !subtype) {
-                alert('请先选择主类型和子类型。');
-                return;
-            }
-
-            // 将 title 改为第一个选择框（主类型）的显示文本
-            const title = primarySelect.options[primarySelect.selectedIndex].text;
-
-            const params = new URLSearchParams({
-                type: type,
-                subtype: subtype,
-                title: title,
-                count: '10',
-                timestamp: Date.now().toString()
-            });
-            window.location.href = `/page?${params.toString()}`;
-        }
-    </script>
 </body>
 </html>

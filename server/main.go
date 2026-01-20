@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"mymathjs/server/questions"
+	"mymathjs/server/subjects"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,6 +36,7 @@ func main() {
 	})
 
 	r.GET("/page", handlePageRequest)
+	r.GET("/math", subjects.HandleMathPage)
 	r.GET("/api/generate/:type", generateQuestions)
 	r.Run(":8080")
 }

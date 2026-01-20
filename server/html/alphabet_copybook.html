@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英文字母字帖 (English Alphabet Copybook)</title>
+    <!-- 引入 Comic Neue 字体，它非常接近标准的手写印刷体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 10mm auto;
+            border: 1px solid #d3d3d3;
+            border-radius: 5px;
+            background: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            page-break-after: always; /* Ensure print break */
+            position: relative;
+        }
+        
+        /* Remove last page break to avoid empty sheet */
+        .page:last-child {
+            page-break-after: auto;
+        }
+
+        @media print {
+            body { 
+                margin: 0; 
+                background: white;
+            }
+            .page {
+                margin: 0;
+                border: initial;
+                border-radius: initial;
+                width: initial;
+                min-height: initial;
+                box-shadow: initial;
+                background: initial;
+                page-break-after: always;
+            }
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .letter-group {
+            margin-bottom: 10px; /* Space between different letters blocks */
+        }
+        
+        /* 
+           英语四线三格样式 
+           总高度设定为比如 60px 
+           行距缩小以容纳更多行
+        */
+        .writing-row {
+            position: relative;
+            height: 70px; /* 60px content + 10px margin */
+            margin-bottom: 15px; 
+            display: flex;
+            align-items: flex-end; /* 字母底部对齐基线 */
+        }
+
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px; /* 文字书写区域的高度 */
+            /* 
+               使用渐变绘制线条
+               1. 顶线 (Top Line) - 0%
+               2. 中线 (Middle Line/Dashed) - 33.3% 
+               3. 基线 (Base Line/Red) - 66.6% 
+               4. 底线 (Bottom Line) - 100%
+            */
+            background: 
+                linear-gradient(to bottom, black 1px, transparent 1px) 0 0,          /* Top Line @ 0px */
+                linear-gradient(to right, #999 50%, transparent 50%) 0 20px,         /* Middle Line (Dash effect via repeat-x size below) @ 20px */
+                linear-gradient(to bottom, #e04444 1px, transparent 1px) 0 40px,     /* Base Line @ 40px */
+                linear-gradient(to bottom, black 1px, transparent 1px) 0 60px;       /* Bottom Line @ 60px */
+            
+            background-size: 
+                100% 1px,     /* Top */
+                10px 1px,     /* Middle (Dotted/Dashed width) */
+                100% 1px,     /* Base */
+                100% 1px;     /* Bottom */
+            
+            background-repeat: 
+                no-repeat,
+                repeat-x,
+                no-repeat,
+                no-repeat;
+        }
+
+        .letters {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            /* 改用 Comic Neue 或 Comic Sans MS，这些字体有单层结构的 a 和 g，更适合字帖 */
+            font-family: "Comic Neue", "Comic Sans MS", "Chalkboard SE", sans-serif;
+            font-size: 60px; /* 字体调整：Comic Neue 视觉上偏小，调大一点 */
+            line-height: 1;
+            letter-spacing: 20px; /* Space between letters */
+            color: #d3d3d3; /* 默认描红颜色：浅灰 */
+            padding-left: 10px;
+            
+            /* 
+             不同字体的基线位置不同，Comic Neue 可能需要微调
+            */
+            top: -16px; 
+        }
+
+        /* 
+           使用 CSS 伪元素选择器 ::first-letter
+           让该行的第一个字母显示为实心黑色
+           其余字母保持继承父元素的浅灰色 (#d3d3d3)
+        */
+        .letters::first-letter {
+            color: black;
+            font-weight: bold; /* Optional: make the sample letter slightly bolder */
+        }
+        
+    </style>
+</head>
+<body>
+
+<div id="container"></div>
+
+<script>
+    const container = document.getElementById('container');
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    
+    // Configuration
+    // 页面高度有限，每页放2个字母，每个字母6行（3大写+3小写），共12行。
+    const lettersPerPage = 2; 
+    
+    // Content generators
+    function createRow(content) {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'writing-row';
+        
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'grid-lines';
+        
+        const lettersDiv = document.createElement('div');
+        lettersDiv.className = 'letters';
+        lettersDiv.innerText = content;
+        
+        rowDiv.appendChild(gridDiv);
+        rowDiv.appendChild(lettersDiv);
+        return rowDiv;
+    }
+
+    function createPage() {
+        const page = document.createElement('div');
+        page.className = 'page';
+        const h1 = document.createElement('h1');
+        h1.innerText = 'Alphabet Writing Practice';
+        page.appendChild(h1);
+        return page;
+    }
+
+    let currentPage = null;
+    let letterCountOnPage = 0;
+
+    letters.forEach((letter, index) => {
+        // Start new page if needed
+        if (index % lettersPerPage === 0) {
+            currentPage = createPage();
+            container.appendChild(currentPage);
+            letterCountOnPage = 0;
+        }
+
+        // Wrapper for letter group
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'letter-group';
+
+        const lowerLetter = letter.toLowerCase();
+
+        // Row 1: Uppercase Solid + 5 Traceable (Total 6)
+        const upperStrRow1 = Array(6).fill(letter).join(' ');
+        
+        // Row 2 & 3: Uppercase Solid Only (Rest blank)
+        const upperStrSingle = letter;
+
+        // Row 4: Lowercase Solid + 5 Traceable (Total 6)
+        const lowerStrRow1 = Array(6).fill(lowerLetter).join(' ');
+
+        // Row 5 & 6: Lowercase Solid Only (Rest blank)
+        const lowerStrSingle = lowerLetter;
+        
+        // 1. First Row: A A A A A A (1 Solid, 5 Gray)
+        groupDiv.appendChild(createRow(upperStrRow1));
+        
+        // 2-3. Rows: A (1 Solid, rest blank)
+        groupDiv.appendChild(createRow(upperStrSingle));
+        groupDiv.appendChild(createRow(upperStrSingle));
+
+        // 4. Fourth Row: a a a a a a (1 Solid, 5 Gray)
+        groupDiv.appendChild(createRow(lowerStrRow1));
+
+        // 5-6. Rows: a (1 Solid, rest blank)
+        groupDiv.appendChild(createRow(lowerStrSingle));
+        groupDiv.appendChild(createRow(lowerStrSingle));
+
+        currentPage.appendChild(groupDiv);
+    });
+
+</script>
+
+</body>
+</html>
