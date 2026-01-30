@@ -10,6 +10,7 @@ import (
 func init() {
 	qt := GetQuestionTemplate()
 	qt.RegisterTemplate(3, 1, 1, new(QuestionTemplate31_1))
+
 }
 
 type QuestionTemplate31_1 struct {

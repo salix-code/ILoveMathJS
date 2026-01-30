@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数学闯关</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding: 10px;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            color: #1565c0;
+            font-weight: bold;
+        }
+
+        .question-box {
+            font-size: 1.5rem;
+            margin: 2rem 0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #444;
+        }
+
+        .input-group {
+            margin-bottom: 2rem;
+        }
+
+        input[type="text"] {
+            font-size: 1.2rem;
+            padding: 10px;
+            width: 200px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #2196f3;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 24px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-next {
+            background-color: #2196f3;
+            color: white;
+        }
+
+        .btn-submit {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Result View */
+        #result-view {
+            display: none;
+        }
+
+        .result-stats {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin: 20px 0;
+        }
+        
+        .feedback {
+            height: 20px; 
+            margin-top: 5px; 
+            font-size: 0.9rem;
+        }
+        .feedback.correct { color: green; }
+        .feedback.wrong { color: red; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="exam-view">
+    <h1>闯关挑战</h1>
+    
+    <div class="stats-bar">
+        <span id="timer">时间: 00:00</span>
+        <span id="counter">已答: 0</span>
+    </div>
+
+    <div class="question-box" id="question-text">
+        正在加载题目...
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="answer-input" placeholder="输入答案" autocomplete="off" onkeydown="if(event.key==='Enter') nextQuestion()">
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-next" onclick="nextQuestion()" id="btn-next">下一个</button>
+        <button class="btn-submit" onclick="finishExam()">提交</button>
+    </div>
+</div>
+
+<div class="container" id="result-view">
+    <h1>挑战完成</h1>
+    <div class="result-stats">
+        <p>总用时: <span id="total-time">00:00</span></p>
+        <p>答题总数: <span id="total-count">0</span></p>
+        <p>正确题数: <span id="correct-count">0</span></p>
+        <p>正确率: <span id="accuracy">0%</span></p>
+    </div>
+    <button class="btn-submit" onclick="restart()">再来一次</button>
+</div>
+
+<script>
+    // 状态变量
+    let currentQuestion = null;
+    let startTime = Date.now();
+    let timerInterval = null;
+    let answeredCount = 0;
+    let correctCount = 0;
+    
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        startTimer();
+        // 确保输入框自动获取焦点
+        const input = document.getElementById('answer-input'); 
+        if (input) input.focus();
+
+        fetchNextQuestion();
+    });
+
+    // 计时器
+    function startTimer() {
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+            const now = Date.now();
+            const diff = Math.floor((now - startTime) / 1000);
+            const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+            const seconds = (diff % 60).toString().padStart(2, '0');
+            const timerEl = document.getElementById('timer');
+            if(timerEl) timerEl.innerText = `时间: ${minutes}:${seconds}`;
+        }, 1000);
+    }
+
+    // 获取题目
+    async function fetchNextQuestion() {
+        // 清空输入和反馈
+        const input = document.getElementById('answer-input');
+        if(input) {
+            input.value = '';
+            input.focus();
+        }
+        const fbEl = document.getElementById('feedback');
+        if(fbEl) fbEl.innerText = '';
+        
+        const nextBtn = document.getElementById('btn-next');
+        if(nextBtn) nextBtn.disabled = true; // 防止重复点击
+
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tag = urlParams.get('tag') || '';
+            
+            // 请求新题目
+            const res = await fetch(`/api/examination?tag=${encodeURIComponent(tag)}`);
+            if (!res.ok) throw new Error("Network response was not ok");
+            
+            const data = await res.json();
+            // data 结构期望: { content: "1+1=?", answer: "2", id: "..." }
+            
+            currentQuestion = data;
+            
+            // 显示题目 (兼容字符串或对象)
+            const content = typeof data === 'object' ? (data.content || data.text || JSON.stringify(data)) : data;
+            document.getElementById('question-text').innerHTML = content;
+            
+            if(nextBtn) nextBtn.disabled = false;
+
+        } catch (err) {
+            console.error("加载题目失败", err);
+            document.getElementById('question-text').innerText = "加载失败，请刷新重试";
+        }
+    }
+
+    // 点击“下一个”
+    async function nextQuestion() {
+        if (!currentQuestion) return;
+
+        const input = document.getElementById('answer-input');
+        const userAnswer = input.value.trim();
+        
+        if (!userAnswer) {
+            alert("请输入答案");
+            return;
+        }
+
+        // 1. 本地校验答案
+        // 假设服务端返回的 answer 字段为正确答案
+        // 如果题目比较复杂，可以考虑全部转 swtring 比较或者 parse float
+        const correctAnswer = String(currentQuestion.answer).trim();
+        const isCorrect = (userAnswer == correctAnswer); // 简单宽松比较
+        
+        // 更新本地统计
+        answeredCount++;
+        if (isCorrect) correctCount++;
+        
+        document.getElementById('counter').innerText = `已答: ${answeredCount}`;
+        
+        /* 
+        // 暂时无需显示正确错误，直接切下一题
+        const fbIdx = document.getElementById('feedback');
+        fbIdx.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+        fbIdx.innerText = isCorrect ? '回答正确' : `回答错误，正确答案: ${correctAnswer}`;
+        */
+
+        // 2. 将结果发送给服务器
+        try {
+            // 这里我们只需要发送结果，并不用太在意返回值，除非服务器要控制结束
+            await fetch('/api/examination', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: currentQuestion.id,
+                    isCorrect: isCorrect,
+                    userAnswer: userAnswer,
+                    tag: new URLSearchParams(window.location.search).get('tag')
+                })
+            });
+        } catch (e) {
+            console.error("上传结果失败", e);
+        }
+
+        // 3. 获取下一题
+        fetchNextQuestion();
+    }
+
+    // 点击“提交”
+    function finishExam() {
+        clearInterval(timerInterval);
+        
+        document.getElementById('exam-view').style.display = 'none';
+        document.getElementById('result-view').style.display = 'block';
+
+        // 计算结果
+        const now = Date.now();
+        const diff = Math.floor((now - startTime) / 1000);
+        const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+        const seconds = (diff % 60).toString().padStart(2, '0');
+
+        document.getElementById('total-time').innerText = `${minutes}:${seconds}`;
+        document.getElementById('total-count').innerText = answeredCount;
+        document.getElementById('correct-count').innerText = correctCount;
+        
+        const rate = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
+        document.getElementById('accuracy').innerText = `${rate}%`;
+    }
+
+    function restart() {
+        window.location.reload();
+    }
+</script>
+
+</body>
+</html>

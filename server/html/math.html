@@ -25,25 +25,61 @@
         .card {
             background-color: white;
             border-radius: 12px;
-            padding: 30px 20px;
+            padding: 20px;
             text-align: center;
-            text-decoration: none;
             color: #333;
-            font-size: 1.2rem;
-            font-weight: 600;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-            border: 2px solid transparent;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #eee;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            min-height: 120px;
+            min-height: 150px;
         }
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-            border-color: #4facfe;
-            color: #4facfe;
+        }
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+        .btn {
+            flex: 1;
+            padding: 8px 0;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+            cursor: pointer;
+            border: none;
+            display: inline-block;
+        }
+        .btn-practice {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        .btn-practice:hover {
+            background-color: #bbdefb;
+        }
+        .btn-challenge {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+        .btn-challenge:hover {
+            background-color: #ffe0b2;
         }
         
         /* Optional: Add some subtle colors to cards for variety */
@@ -61,7 +97,13 @@
 
 <div class="grid-container">
     {{range .Items}}
-    <a href="selection?tag={{.Tag}}" class="card">{{.Title}}</a>
+    <div class="card">
+        <div class="card-title">{{.Title}}</div>
+        <div class="button-group">
+            <a href="selection?tag={{.Tag}}" class="btn btn-practice">练习</a>
+            <a href="examination?tag={{.Tag}}" class="btn btn-challenge">闯关</a>
+        </div>
+    </div>
     {{end}}
 </div>
 

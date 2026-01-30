@@ -8,7 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"mymathjs/server/examination"
 	"mymathjs/server/questions"
+	"mymathjs/server/selection"
 	"mymathjs/server/subjects"
 
 	"github.com/gin-gonic/gin"
@@ -37,7 +39,9 @@ func main() {
 
 	r.GET("/page", handlePageRequest)
 	r.GET("/math", subjects.HandleMathPage)
-	r.GET("/api/generate/:type", generateQuestions)
+	r.GET("/selection", selection.HandleSelection)
+	r.GET("/api/generate/", generateQuestions)
+	r.GET("/api/examination/", handleExamination)
 	r.Run(":8080")
 }
 
@@ -62,20 +66,7 @@ func handlePageRequest(c *gin.Context) {
 		}
 
 	default:
-		templateName = "page.html"
-		parts := strings.Split(questionType, "_")
-		if len(parts) == 3 {
-			chapter, _ := strconv.Atoi(parts[1]) // 5
-			section, _ := strconv.Atoi(parts[2]) // 15 或 12
-
-			qs := questions.GenerateQuestions(chapter, section, subType, count)
-			pageData = gin.H{
-				"Title":     title,
-				"Type":      questionType,
-				"Subtype":   subType,
-				"Questions": qs,
-			}
-		}
+		break
 
 	}
 
@@ -83,24 +74,27 @@ func handlePageRequest(c *gin.Context) {
 }
 
 func generateQuestions(c *gin.Context) {
-	questionType := c.Param("type")
-	subType := c.DefaultQuery("subtype", "type1")
-	count, _ := strconv.Atoi(c.DefaultQuery("count", "10"))
-
-	var qs []interface{}
-
-	switch questionType {
-	case "math_5_16":
-		qs = questions.GenerateMath516Questions(subType, count)
-	default:
-		c.JSON(http.StatusBadRequest, gin.H{"error": "未知题型"})
+	question := c.Query("selection")
+	lastDotIndex := strings.LastIndex(question, ".")
+	if lastDotIndex == -1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid format"})
 		return
 	}
+	tag := question[:lastDotIndex]
 
-	c.JSON(http.StatusOK, gin.H{
-		"success":   true,
-		"type":      questionType,
-		"subtype":   subType,
-		"questions": qs,
-	})
+	categoryStr := question[lastDotIndex+1:]
+	category, err := strconv.Atoi(categoryStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category"})
+		return
+	}
+	qs := questions.GenerateQuestions(tag, category, 10)
+	c.JSON(http.StatusOK, qs)
+}
+
+func handleExamination(c *gin.Context) {
+	tag := c.DefaultQuery("tag", "")
+	res := examination.HandleExamination(tag)
+	c.JSON(http.StatusOK, res)
+
 }

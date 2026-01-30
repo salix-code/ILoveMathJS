@@ -4,52 +4,22 @@ package questions
 import (
 	"fmt"
 	"math/rand"
+	"mymathjs/server/subjects"
 	"strings"
 )
 
 func init() {
-	qt := GetQuestionTemplate()
-	qt.RegisterTemplate(6, 16, 1, NewQuestionTemplate616_1())
-	qt.RegisterTemplate(6, 16, 2, new(QuestionTemplate616_2))
-	qt.RegisterTemplate(6, 16, 3, new(QuestionTemplate616_3))
-	qt.RegisterTemplate(6, 16, 4, new(QuestionTemplate616_4))
-	qt.RegisterTemplate(6, 16, 5, new(QuestionTemplate616_5))
+	subject := subjects.GetMathSubjectsInstance()
+	subject.Register("6.16", "等量代換")
+
+	subject.AddCategory("6.16", 2, "买卖同价", NewQuestionTemplate616_2)
+	subject.AddCategory("6.16", 3, "整体部分", NewQuestionTemplate616_3)
+	subject.AddCategory("6.16", 4, "三者关系", NewQuestionTemplate616_4)
+	subject.AddCategory("6.16", 5, "合资购物", NewQuestionTemplate616_5)
 }
 
-type QuestionTemplate616_1 struct {
-	number [5]int
-}
-
-func NewQuestionTemplate616_1() *QuestionTemplate616_1 {
-	return &QuestionTemplate616_1{}
-}
-
-// getKey implements IQuestionTemplate.
-func (me *QuestionTemplate616_1) getKey() int {
-	panic("unimplemented")
-}
-
-func (me *QuestionTemplate616_1) randomData() {
-	me.number[0] = rand.Intn(3) + 2
-	me.number[1] = me.number[0] * (rand.Intn(3) + 2)
-	me.number[2] = rand.Intn(5) + 2
-	a := (rand.Intn(3) + 5)
-	me.number[3] = me.number[2] * a
-	me.number[4] = (rand.Intn(me.number[2]-1) + 1) * a
-}
-
-func (me *QuestionTemplate616_1) generateQuestion() string {
-	namePool := []string{"苹果", "鸭梨", "香蕉", "羊", "兔", "骆驼", "鸡", "鸭", "鹅", "蓝球", "足球", "排球"}
-
-	nameIndex := rand.Intn(len(namePool)/3) * 3
-	name := namePool[nameIndex : nameIndex+3]
-
-	return fmt.Sprintf("%d个%s可以换%d个%s,%d个%s可以换%d个%s，问：%d个%s可以换多少个%s？",
-		me.number[0], name[0], me.number[1], name[1], me.number[2], name[0], me.number[3], name[2], me.number[4], name[2], name[1])
-}
-
-func (me *QuestionTemplate616_1) getID() int {
-	return 1
+func NewQuestionTemplate616_2() subjects.IQuestionGenerator {
+	return &QuestionTemplate616_2{}
 }
 
 type QuestionTemplate616_2 struct {
@@ -59,7 +29,7 @@ type QuestionTemplate616_2 struct {
 	number      [2]int
 }
 
-func (me *QuestionTemplate616_2) randomData() {
+func (me *QuestionTemplate616_2) RandomData() {
 	me.number[0] = rand.Intn(3) + 2
 	me.number[1] = me.number[0]
 	if me.number[0]%2 == 0 {
@@ -75,18 +45,18 @@ func (me *QuestionTemplate616_2) randomData() {
 
 }
 
-func (me *QuestionTemplate616_2) getID() int {
-	return 2
-}
-
-func (me *QuestionTemplate616_2) generateQuestion() string {
+func (me *QuestionTemplate616_2) Generate() string {
 	title := fmt.Sprintf("学校买了%d个蓝球和%d个排球，一共用了%d元，", me.baseketball, me.volleyball, me.totalPrice)
 	title += fmt.Sprintf("%d个蓝球与%d个排球的价钱相等，", me.number[0], me.number[1])
 	title += "每一个蓝球多少元"
 	return title
 }
-func (me *QuestionTemplate616_2) getKey() int {
+func (me *QuestionTemplate616_2) GetKey() int {
 	return hashHelper.HashInt(me.baseketball, me.volleyball, me.totalPrice)
+}
+
+func NewQuestionTemplate616_3() subjects.IQuestionGenerator {
+	return &QuestionTemplate616_3{}
 }
 
 type QuestionTemplate616_3 struct {
@@ -95,13 +65,13 @@ type QuestionTemplate616_3 struct {
 	essayBook   int
 }
 
-func (me *QuestionTemplate616_3) randomData() {
+func (me *QuestionTemplate616_3) RandomData() {
 	me.storyBook = (rand.Intn(30) + 30)
 	me.scienceBook = (rand.Intn(20) + 40)
 	me.essayBook = (rand.Intn(40) + 20)
 }
 
-func (me *QuestionTemplate616_3) generateQuestion() string {
+func (me *QuestionTemplate616_3) Generate() string {
 	namePool := [][]string{
 		{"某班有一个图书角，共有", "故事书", "科技书", "作文书", "本"},
 		{"妈妈买了一些水果，共有", "苹果", "香蕉", "鸭梨", "个"},
@@ -118,8 +88,12 @@ func (me *QuestionTemplate616_3) generateQuestion() string {
 	return title
 }
 
-func (me *QuestionTemplate616_3) getKey() int {
+func (me *QuestionTemplate616_3) GetKey() int {
 	return hashHelper.HashInt(me.scienceBook, me.storyBook, me.essayBook)
+}
+
+func NewQuestionTemplate616_4() subjects.IQuestionGenerator {
+	return &QuestionTemplate616_4{}
 }
 
 type QuestionTemplate616_4 struct {
@@ -128,12 +102,12 @@ type QuestionTemplate616_4 struct {
 	orange int
 }
 
-func (me *QuestionTemplate616_4) randomData() {
+func (me *QuestionTemplate616_4) RandomData() {
 	me.pear = rand.Intn(10) + 10
 	me.apple = rand.Intn(10) + 10
 	me.orange = rand.Intn(10) + 10
 }
-func (me *QuestionTemplate616_4) generateQuestion() string {
+func (me *QuestionTemplate616_4) Generate() string {
 	a := 1
 	b := a + rand.Intn(3) + 1
 	total := me.pear + me.apple + me.orange
@@ -154,20 +128,24 @@ func (me *QuestionTemplate616_4) generateQuestion() string {
     </div>`, condition[0], condition[1], condition[2])
 }
 
-func (me *QuestionTemplate616_4) getKey() int {
+func (me *QuestionTemplate616_4) GetKey() int {
 	return hashHelper.HashInt(me.pear, me.apple, me.orange)
+}
+
+func NewQuestionTemplate616_5() subjects.IQuestionGenerator {
+	return &QuestionTemplate616_5{}
 }
 
 type QuestionTemplate616_5 struct {
 	people int
 }
 
-func (me *QuestionTemplate616_5) randomData() {
+func (me *QuestionTemplate616_5) RandomData() {
 	me.people = rand.Intn(4) + 2
 
 }
 
-func (me *QuestionTemplate616_5) generateQuestion() string {
+func (me *QuestionTemplate616_5) Generate() string {
 	namePool := []string{"小明", "小红", "小刚", "小华", "小丽", "小强", "小美", "小东", "小西", "小南", "小北"}
 	nameIndex := rand.Perm(len(namePool))
 	title := []string{}
@@ -189,6 +167,6 @@ func (me *QuestionTemplate616_5) generateQuestion() string {
 	return strings.Join(title, "")
 }
 
-func (me *QuestionTemplate616_5) getKey() int {
+func (me *QuestionTemplate616_5) GetKey() int {
 	return hashHelper.HashInt(me.people)
 }
