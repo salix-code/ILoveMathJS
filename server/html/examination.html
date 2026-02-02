@@ -161,6 +161,9 @@
 </div>
 
 <script>
+    // 服务端注入 Session
+    const SESSION_ID = "{{ .Session }}";
+
     // 状态变量
     let currentQuestion = null;
     let startTime = Date.now();
@@ -168,6 +171,20 @@
     let answeredCount = 0;
     let correctCount = 0;
     
+    function getDeviceId() {
+        let deviceId = localStorage.getItem('app_device_id');
+        if (!deviceId) {
+            // 生成一个 UUID (v4)
+            deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            localStorage.setItem('app_device_id', deviceId);
+        }
+        return deviceId;
+    }
+
+
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
         startTimer();
@@ -210,7 +227,7 @@
             const tag = urlParams.get('tag') || '';
             
             // 请求新题目
-            const res = await fetch(`/api/examination?tag=${encodeURIComponent(tag)}`);
+            const res = await fetch(`/api/examination?tag=${encodeURIComponent(tag)}&session=${SESSION_ID}`);
             if (!res.ok) throw new Error("Network response was not ok");
             
             const data = await res.json();
@@ -273,7 +290,8 @@
                     id: currentQuestion.id,
                     isCorrect: isCorrect,
                     userAnswer: userAnswer,
-                    tag: new URLSearchParams(window.location.search).get('tag')
+                    tag: new URLSearchParams(window.location.search).get('tag'),
+                    session: SESSION_ID
                 })
             });
         } catch (e) {

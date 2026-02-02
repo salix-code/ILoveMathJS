@@ -40,8 +40,10 @@ func main() {
 	r.GET("/page", handlePageRequest)
 	r.GET("/math", subjects.HandleMathPage)
 	r.GET("/selection", selection.HandleSelection)
+	r.GET("/examination", examination.HandleExaminationPage)
 	r.GET("/api/generate/", generateQuestions)
-	r.GET("/api/examination/", handleExamination)
+	r.GET("/api/examination", examination.HandleCreateQuestion)
+	r.POST("/api/examination", examination.HandleApiSubmitExamination)
 	r.Run(":8080")
 }
 
@@ -90,11 +92,4 @@ func generateQuestions(c *gin.Context) {
 	}
 	qs := questions.GenerateQuestions(tag, category, 10)
 	c.JSON(http.StatusOK, qs)
-}
-
-func handleExamination(c *gin.Context) {
-	tag := c.DefaultQuery("tag", "")
-	res := examination.HandleExamination(tag)
-	c.JSON(http.StatusOK, res)
-
 }

@@ -8,7 +8,7 @@ import (
 )
 
 type IQuestionGenerator interface {
-	RandomData()
+	RandomData() int
 	Generate() string
 	GetKey() int
 }
@@ -106,6 +106,7 @@ func GetMathSubjectsInstance() *FSubjectItems {
 }
 
 func HandleMathPage(c *gin.Context) {
+	//deviceId := c.Query("deviceId")
 	items := GetMathSubjectsInstance().Items
 
 	c.HTML(http.StatusOK, "math.html", gin.H{

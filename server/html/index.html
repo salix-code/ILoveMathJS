@@ -126,5 +126,31 @@
             <div>常识</div>
         </a>
     </div>
+
+    <script>
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('app_device_id');
+            if (!deviceId) {
+                // 生成一个 UUID (v4)
+                deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+                localStorage.setItem('app_device_id', deviceId);
+            }
+            return deviceId;
+        }
+
+        // 页面加载完成后，给 math 链接加上 deviceId
+        document.addEventListener('DOMContentLoaded', () => {
+            const deviceId = getDeviceId();
+            const mathLink = document.querySelector('a[href="math"]');
+            if (mathLink) {
+                // 判断原本是否已有参数
+                const separator = mathLink.href.includes('?') ? '&' : '?';
+                mathLink.href = mathLink.href + separator + 'deviceId=' + deviceId;
+            }
+        });
+    </script>
 </body>
 </html>

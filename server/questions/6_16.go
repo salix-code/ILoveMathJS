@@ -29,7 +29,7 @@ type QuestionTemplate616_2 struct {
 	number      [2]int
 }
 
-func (me *QuestionTemplate616_2) RandomData() {
+func (me *QuestionTemplate616_2) RandomData() int {
 	me.number[0] = rand.Intn(3) + 2
 	me.number[1] = me.number[0]
 	if me.number[0]%2 == 0 {
@@ -42,6 +42,8 @@ func (me *QuestionTemplate616_2) RandomData() {
 
 	me.volleyball = rand.Intn(me.baseketball-2) + 1
 	me.totalPrice = (me.volleyball + me.number[1]*scaleValue) * (rand.Intn(10) + 10)
+
+	return 0
 
 }
 
@@ -65,10 +67,12 @@ type QuestionTemplate616_3 struct {
 	essayBook   int
 }
 
-func (me *QuestionTemplate616_3) RandomData() {
+func (me *QuestionTemplate616_3) RandomData() int {
 	me.storyBook = (rand.Intn(30) + 30)
 	me.scienceBook = (rand.Intn(20) + 40)
 	me.essayBook = (rand.Intn(40) + 20)
+
+	return 0
 }
 
 func (me *QuestionTemplate616_3) Generate() string {
@@ -102,10 +106,11 @@ type QuestionTemplate616_4 struct {
 	orange int
 }
 
-func (me *QuestionTemplate616_4) RandomData() {
+func (me *QuestionTemplate616_4) RandomData() int {
 	me.pear = rand.Intn(10) + 10
 	me.apple = rand.Intn(10) + 10
 	me.orange = rand.Intn(10) + 10
+	return 0
 }
 func (me *QuestionTemplate616_4) Generate() string {
 	a := 1
@@ -140,9 +145,9 @@ type QuestionTemplate616_5 struct {
 	people int
 }
 
-func (me *QuestionTemplate616_5) RandomData() {
+func (me *QuestionTemplate616_5) RandomData() int {
 	me.people = rand.Intn(4) + 2
-
+	return 0
 }
 
 func (me *QuestionTemplate616_5) Generate() string {

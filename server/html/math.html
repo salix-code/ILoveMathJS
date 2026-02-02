@@ -107,5 +107,31 @@
     {{end}}
 </div>
 
+<script>
+    function getDeviceId() {
+        let deviceId = localStorage.getItem('app_device_id');
+        if (!deviceId) {
+            // 生成一个 UUID (v4)
+            deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            localStorage.setItem('app_device_id', deviceId);
+        }
+        return deviceId;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const deviceId = getDeviceId();
+        // 找到所有的闯关(examination)链接
+        const links = document.querySelectorAll('a[href^="examination"]');
+        
+        links.forEach(link => {
+            const separator = link.href.includes('?') ? '&' : '?';
+            link.href = link.href + separator + 'deviceId=' + deviceId;
+        });
+    });
+</script>
+
 </body>
 </html>
